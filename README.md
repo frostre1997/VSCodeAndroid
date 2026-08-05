@@ -1,55 +1,77 @@
-# VSCode Android Port
+# Visual Code Studio for Android
 
-This is an open-source port of Visual Studio Code (VSCode) for Android, providing a fully functional development environment on your mobile device. With this app, you can log in, use remote repositories, SSH, install extensions, run code, and more—all on Android!
+An open-source Android client for [vscode.dev](https://vscode.dev/) — a fully functional development environment on your mobile device. Sign in, use remote repositories, connect over SSH, install extensions, run code, and more.
+
+> This is a redesigned fork of the abandoned [`frostre1997/VSCodeAndroid`](https://github.com/frostre1997/VSCodeAndroid) project. It is built on the GoNative webview wrapper, so most styling is driven by `app/src/main/assets/appConfig.json`.
 
 ## Features
 
-- **Login & Authentication**: Log into your GitHub or other remote repositories.
+- **Login & Authentication**: Sign into GitHub and other remote repositories.
 - **Remote Repositories**: Clone, push, and pull from Git repositories.
-- **SSH**: Use SSH to access remote servers directly from the app.
-- **Extensions**: Install and manage VSCode extensions.
-- **Run Code**: Execute your code right on your Android device, with full support for languages like Python, JavaScript, and more.
-- **Full VSCode Functionality**: Almost all VSCode features are ported over, so you can work just as you would on a desktop!
+- **SSH**: Access remote servers directly from the app.
+- **Extensions**: Install and manage VS Code extensions.
+- **Run Code**: Execute code on your device, with support for Python, JavaScript, and more.
+- **Full VS Code functionality**: Almost all VS Code features are available.
 
-## How to Build and Install the App
+## The redesign
 
-Follow these steps to quickly build and install the app on your Android device. I've included simple copy-paste commands for **Debug** and **Release** builds.
+- **New identity** — an original blue-to-navy "code chevron" icon, matching splash screen and offline page.
+- **VSCode-inspired palette** — accent `#007ACC`, dark `#1E1E1E` / `#252526` surfaces, deep navy `#0A1A2F` splash.
+- **Auto theming** — the app follows the system light/dark setting (`androidTheme: auto`).
+- **Web UI refresh** — `app/src/main/assets/customCSS.css` (and `androidCustomCSS.css`) are injected into every `vscode.dev` page to align the accent color, polish the chrome and enlarge touch targets on mobile.
+- **Fixed navigation drawer** — no longer opens full-screen (capped at 320dp).
+
+## Build & install
 
 ### Prerequisites
-- **Java Development Kit (JDK)** version 8 or above
-- **Gradle** (Gradle version 7.x or higher recommended)
-- **Android SDK** installed
 
-### 1. **Clone the Repository**:
-`git clone https://github.com/Fundiman/VSCodeAndroid.git`
-`cd VSCodeAndroid`
+- **JDK 17** (or newer)
+- **Gradle 8.5+** (the project ships a wrapper in `gradlew`)
+- **Android SDK** (compile SDK 34)
 
-### 2. **Install Dependencies** (optional but recommended):
-If you haven't already, run this to ensure everything is set up:
-`gradle build`
+### Commands
 
-### 3. **Build and Install the APK**:
+```bash
+git clone <your-fork-url> VSCodeAndroid
+cd VSCodeAndroid
 
-#### **For Debug Build (Fastest for testing)**:
-Just copy-paste the following command to build and install the APK for debugging:
-`gradle assembleDebug && adb install app/build/outputs/apk/debug/app-debug.apk`
+# Debug build
+./gradlew assembleDebug
+adb install app/build/outputs/apk/debug/app-debug.apk
 
-#### **For Release Build (For final production)**:
-If you’re ready for a release build, use this command:
-`gradle assembleRelease && adb install app/build/outputs/apk/release/app-release.apk`
+# Release build
+./gradlew assembleRelease
+adb install app/build/outputs/apk/release/app-release.apk
+```
 
-### Troubleshooting
-- **Build Failures**: If the build fails due to dependencies, ensure that your `gradle.properties` and `build.gradle` files are correct.
-- **Device Compatibility**: Make sure your device has enough resources (especially RAM) to run VSCode.
+> Note: the `signingConfigs.release` block references `release.keystore`. Replace it with your own keystore before shipping.
 
-## Contributing
+## Regenerating assets
 
-Feel free to fork the repository, make improvements, and submit pull requests. All contributions are welcome!
+Icons, splash and logos are generated from a single design by a **cross-platform** Python script (no ImageMagick or `sips` needed):
+
+```bash
+pip install pillow
+python3 tools/generate_icons.py
+```
+
+The legacy `generate-app-icons.sh` / `generate-header-images.sh` scripts (macOS-only) are kept for reference but are no longer required.
+
+## Theming
+
+| Where | What it controls |
+| --- | --- |
+| `appConfig.json` → `styling` | All native chrome colors (action bar, status bar, tabs, sidebar, splash) and theme mode |
+| `res/values/colors.xml` | Light-theme native colors |
+| `res/values-night/colors.xml` | Dark-theme native colors |
+| `assets/customCSS.css` | Injected styles for the web UI (accent color, touch targets) |
+| `assets/androidCustomCSS.css` | Android-only web UI overrides |
+| `assets/offline.html` | Offline page |
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE).
 
 ## Disclaimer
 
-This is an unofficial port of Visual Studio Code for Android. It is not endorsed by or affiliated with Microsoft in any way. The original VSCode app is developed and maintained by Microsoft.
+Unofficial client for Visual Studio Code. Not endorsed by or affiliated with Microsoft. The original VS Code app is developed and maintained by Microsoft.

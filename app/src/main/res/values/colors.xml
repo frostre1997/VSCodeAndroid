@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <resources>
-  <color name="colorPrimary">#ffffff</color>
-  <color name="statusBarBackground">#5c5c5c</color>
-  <color name="titleTextColor">#1a100b</color>
-  <color name="colorAccent">#009688</color>
-  <color name="colorBackground">#ffffff</color>
-  <color name="drawerArrow">#1a100b</color>
-  <color name="sidebarForeground">#1a100b</color>
-  <color name="sidebarBackground">#ffffff</color>
-  <color name="sidebarSeparatorColor">#cccccc</color>
-  <color name="sidebarHighlight">#1a100b</color>
-  <color name="tabBarBackground">#ffffff</color>
-  <color name="tabBarTextColor">#949494</color>
-  <color name="tabBarIndicator">#1a100b</color>
-  <color name="swipe_nav_background">#ffffff</color>
-  <color name="swipe_nav_inactive">#666666</color>
-  <color name="swipe_nav_active">#000000</color>
-  <color name="pull_to_refresh_color">#1a100b</color>
-  <color name="splash_background">#ffffff</color>
-  <color name="progress_indicator">#808080</color>
-  <color name="systemNavBarBackground">#ffffff</color>
+  <color name="colorPrimary">#FFFFFF</color>
+  <color name="statusBarBackground">#FFFFFF</color>
+  <color name="titleTextColor">#1A1A1A</color>
+  <color name="colorAccent">#007ACC</color>
+  <color name="colorBackground">#FFFFFF</color>
+  <color name="drawerArrow">#1A1A1A</color>
+  <color name="sidebarForeground">#2B2B2B</color>
+  <color name="sidebarBackground">#FFFFFF</color>
+  <color name="sidebarSeparatorColor">#E5E5E5</color>
+  <color name="sidebarHighlight">#007ACC</color>
+  <color name="tabBarBackground">#FFFFFF</color>
+  <color name="tabBarTextColor">#6B7280</color>
+  <color name="tabBarIndicator">#007ACC</color>
+  <color name="swipe_nav_background">#F5F6F8</color>
+  <color name="swipe_nav_inactive">#9AA0A6</color>
+  <color name="swipe_nav_active">#007ACC</color>
+  <color name="pull_to_refresh_color">#007ACC</color>
+  <color name="splash_background">#0A1A2F</color>
+  <color name="progress_indicator">#007ACC</color>
+  <color name="systemNavBarBackground">#FFFFFF</color>
 </resources>

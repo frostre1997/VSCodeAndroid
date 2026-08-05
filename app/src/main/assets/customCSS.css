@@ -1,0 +1,83 @@
+/* =============================================================================
+   Visual Code Studio - Web UI refresh
+   -----------------------------------------------------------------------------
+   Injected into every page (vscode.dev) on load by the GoNative wrapper via
+   the `customCSS` / `androidCustomCSS` appConfig keys. The contents are
+   base64-encoded and re-injected as a <style id="median-custom-css"> tag.
+
+   Only brand accents are overridden with !important (to beat VS Code's inline
+   theme variables); the rest is safe structural polish that degrades cleanly.
+   ============================================================================= */
+
+/* ---- Brand accent (light & dark aware) ---- */
+body {
+  --vscode-focusBorder: #007acc !important;
+  --vscode-sash-hoverBorder: #007acc !important;
+  --vscode-button-background: #007acc !important;
+  --vscode-button-hoverBackground: #0060a8 !important;
+  --vscode-button-secondaryBackground: #e8f1fa !important;
+  --vscode-button-secondaryForeground: #1a1a1a !important;
+  --vscode-textLink-foreground: #007acc !important;
+  --vscode-textLink-activeForeground: #0060a8 !important;
+  --vscode-badge-background: #007acc !important;
+  --vscode-progressBar-background: #007acc !important;
+  --vscode-activityBarBadge-background: #007acc !important;
+  --vscode-statusBar-background: #007acc !important;
+  --vscode-statusBar-noFolderBackground: #007acc !important;
+  --vscode-statusBarItem-hoverBackground: #0060a8 !important;
+  --vscode-statusBarItem-activeBackground: #00518f !important;
+  --vscode-list-activeSelectionBackground: #0a6cb2 !important;
+  --vscode-list-activeSelectionForeground: #ffffff !important;
+  --vscode-quickInput-list-focusBackground: #0a6cb2 !important;
+  --vscode-quickInput-list-focusForeground: #ffffff !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    --vscode-focusBorder: #4da3e8 !important;
+    --vscode-sash-hoverBorder: #4da3e8 !important;
+    --vscode-button-background: #007acc !important;
+    --vscode-button-hoverBackground: #1a8ad4 !important;
+    --vscode-textLink-foreground: #4da3e8 !important;
+    --vscode-textLink-activeForeground: #6bb6f0 !important;
+    --vscode-badge-background: #007acc !important;
+    --vscode-list-activeSelectionBackground: #0a5a8a !important;
+    --vscode-quickInput-list-focusBackground: #0a5a8a !important;
+  }
+}
+
+/* ---- Subtle chrome polish ---- */
+.monaco-workbench .monaco-dialog,
+.monaco-workbench .quick-input-widget,
+.monaco-workbench .notification-list-item {
+  border-radius: 8px;
+}
+
+.monaco-workbench .part.statusbar {
+  border-top: 1px solid rgba(128, 128, 128, 0.15);
+}
+
+/* ---- Better touch targets on mobile ---- */
+@media (max-width: 900px) {
+  .monaco-workbench .monaco-menu .action-label,
+  .monaco-workbench .monaco-action-bar .action-item > .codicon,
+  .monaco-workbench .quick-input-widget .quick-input-list .monaco-list-row {
+    min-height: 38px;
+  }
+
+  .monaco-workbench .monaco-button,
+  .monaco-workbench .quick-input-widget .quick-input-list .monaco-list-row .label-name {
+    min-height: 36px;
+    line-height: 36px;
+  }
+
+  .monaco-workbench .part.sidebar .sidebar-viewlet .monaco-list-row {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+}
+
+/* ---- Remove tap highlight flash on Android ---- */
+* {
+  -webkit-tap-highlight-color: transparent;
+}

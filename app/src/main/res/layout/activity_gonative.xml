@@ -97,16 +97,14 @@
 
     </RelativeLayout>
     <!-- The navigation drawer -->
-    <!-- width should be no more than 320dp -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/left_drawer"
-        android:layout_width="match_parent"
+        android:layout_width="320dp"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:layout_weight="80">
+        android:layout_gravity="start">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingTop="11dp">
 
@@ -114,15 +112,18 @@
                 android:id="@+id/header_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp">
+                android:layout_marginBottom="18dp">
 
                 <ImageView
                     android:id="@+id/app_logo"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="92dp"
+                    android:layout_height="92dp"
                     android:layout_centerHorizontal="true"
-                    android:layout_marginTop="30dp"
+                    android:layout_marginTop="34dp"
+                    android:background="@drawable/logo_badge"
                     android:contentDescription="@string/app_logo"
+                    android:padding="16dp"
+                    android:scaleType="fitCenter"
                     android:src="@mipmap/ic_sidebar_logo" />
 
                 <TextView
@@ -131,11 +132,13 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/app_logo"
                     android:layout_centerHorizontal="true"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="18dp"
+                    android:layout_marginBottom="16dp"
                     android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.02"
                     android:textColor="@color/sidebarHighlight"
-                    android:textSize="22sp" />
+                    android:textSize="21sp"
+                    android:textStyle="bold" />
 
                 <View
                     android:id="@+id/header_divider"

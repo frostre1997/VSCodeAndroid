@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-08-05
+
+- **Design overhaul** — new app icon, splash screen and brand palette (VSCode-inspired blue + deep navy) across light and dark themes.
+- Cross-platform icon generator (`tools/generate_icons.py`) replaces the macOS-only `sips`/ImageMagick scripts.
+- Web UI refresh: `customCSS.css` / `androidCustomCSS.css` now injected into `vscode.dev` to align accent colors, polish chrome and improve touch targets on mobile.
+- Redesigned offline page to match the new brand.
+- Fixed the navigation drawer opening full-screen (was `match_parent` + an ignored `layout_weight`).
+- Theming switched to `androidTheme: auto` (follows system light/dark).
+
 ## 2014-01-04
 
 - Fix a crash on reload with no page loaded.

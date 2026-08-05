@@ -49,7 +49,7 @@
         <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash</item>
         <item name="postSplashScreenTheme">@style/GoNativeTheme.NoActionBar</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
     <attr name="inactiveColor" format="color" />
