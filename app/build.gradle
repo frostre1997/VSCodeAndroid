@@ -73,6 +73,13 @@ build.dependsOn parseAppConfig
 build.dependsOn checkGoogleService
 
 android {
+    // Load keystore properties from root project
+    def keystoreProperties = new Properties()
+    def keystorePropertiesFile = rootProject.file('keystore.properties')
+    if (keystorePropertiesFile.exists()) {
+        keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+    }
+
     defaultConfig {
         compileSdk 34
         minSdkVersion 23
@@ -99,11 +106,12 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("../../release.keystore")
-            storePassword "password"
-            keyAlias "release"
-            keyPassword "password"
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
         }
+        // upload is optional; keep it as is or remove it
         upload {
             storeFile file("../../upload.keystore")
             storePassword "password"
