@@ -33,11 +33,11 @@
     "initialUrl": "https://vscode.dev/",
     "androidPackageName": "co.median.android.bznlka",
     "iosBundleId": "co.median.ios.bznlka",
-    "keepScreenOn": null,
+    "keepScreenOn": true,
     "iosUserAgentAdd": "vscodestudio",
     "iosForceUserAgent": "",
     "androidUserAgentAdd": "vscodestudio",
-    "androidForceUserAgent": "",
+    "androidForceUserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
     "androidSigningKey": "release",
     "injectMedianJS": true,
     "forceSessionCookieExpiry": 0,
@@ -124,6 +124,12 @@
           "label": "All pages on my domain",
           "pagesToTrigger": "domain",
           "regex": "https?:\\/\\/([-\\w]+\\.)*vscode.dev(\\/.*)?$"
+        },
+        {
+          "mode": "internal",
+          "label": "VS Code Marketplace",
+          "pagesToTrigger": "custom",
+          "regex": "https?:\\/\\/([-\\w]+\\.)*(marketplace\\.visualstudio\\.com|gallerycdn\\.vsassets\\.io|vsassets\\.io)(\\/.*)?$"
         },
         {
           "mode": "appbrowser",

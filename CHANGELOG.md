@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-08-05 (settings)
+
+- **UA spoof** — Android now reports a desktop Chrome user agent so `vscode.dev` serves the full desktop client.
+- **Marketplace** — `marketplace.visualstudio.com` / `gallerycdn.vsassets.io` / `vsassets.io` load inside the app (extension installs and gallery links no longer jump to an external browser).
+- **Hardware acceleration** — enabled in the manifest for smoother webview rendering.
+- **Storage permissions** — enabled `WRITE_EXTERNAL_STORAGE` (API ≤ 28) and `READ_EXTERNAL_STORAGE` (API ≤ 32) for downloads to public storage.
+- **Keep screen on** — screen now stays awake while the app is in the foreground.
+- **File picker** — added `*/*` `GET_CONTENT` visibility query so file managers show up on Android 11+.
+
 ## 2026-08-05
 
 - **Design overhaul** — new app icon, splash screen and brand palette (VSCode-inspired blue + deep navy) across light and dark themes.
