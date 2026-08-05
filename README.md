@@ -2,7 +2,7 @@
 
 An open-source Android client for [vscode.dev](https://vscode.dev/) — a fully functional development environment on your mobile device. Sign in, use remote repositories, connect over SSH, install extensions, run code, and more.
 
-> This is a redesigned fork of the abandoned [`frostre1997/VSCodeAndroid`](https://github.com/frostre1997/VSCodeAndroid) project. It is built on the GoNative webview wrapper, so most styling is driven by `app/src/main/assets/appConfig.json`.
+> This is a redesigned fork of the abandoned [`Fundiuman/VSCodeAndroid`](https://github.com/Fundiman/VSCodeAndroid) project. It is built on the GoNative webview wrapper, so most styling is driven by `app/src/main/assets/appConfig.json`.
 
 ## Features
 
