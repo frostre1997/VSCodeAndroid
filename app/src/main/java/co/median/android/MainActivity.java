@@ -269,7 +269,6 @@ public class MainActivity extends AppCompatActivity implements Observer,
             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
        );
        getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
-    }
 
         final AppConfig appConfig = AppConfig.getInstance(this);
         GoNativeApplication application = (GoNativeApplication)getApplication();
@@ -278,8 +277,6 @@ public class MainActivity extends AppCompatActivity implements Observer,
 
         // Splash events
         if (this.isRoot) {
-
-            // always install splash to prevent theme-related crashes, even on configuration changes
             SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
             boolean configChanged = savedInstanceState != null && savedInstanceState.getBoolean(CONFIGURATION_CHANGED, false);
 
