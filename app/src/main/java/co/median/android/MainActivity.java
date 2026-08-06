@@ -229,6 +229,21 @@ public class MainActivity extends AppCompatActivity implements Observer,
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState)
+        
+        getWindow().getDecorView().setSystemUiVisibility(
+        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+          View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+          View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+          View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+          View.SYSTEM_UI_FLAG_FULLSCREEN
+          View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+    
+            
+        );
+        getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
+        
+        
         final AppConfig appConfig = AppConfig.getInstance(this);
         GoNativeApplication application = (GoNativeApplication)getApplication();
         GoNativeWindowManager windowManager = application.getWindowManager();
@@ -292,8 +307,6 @@ public class MainActivity extends AppCompatActivity implements Observer,
                 ThemeUtils.setAppThemeApi30AndBelow(appTheme);
             }
         }
-
-        super.onCreate(savedInstanceState);
 
         this.activityId = UUID.randomUUID().toString();
         int urlLevel = getIntent().getIntExtra("urlLevel", -1);
