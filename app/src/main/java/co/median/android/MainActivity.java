@@ -245,8 +245,9 @@ public class MainActivity extends AppCompatActivity implements Observer,
             String desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
             settings.setUserAgentString(desktopUA);
 
-            mWebview.setWebViewClient(new CustomWebViewClient());
-                
+            if (mWebview instanceof WebView) {
+                ((WebView) mWebview).setWebViewClient(new CustomWebViewClient());
+            }
         }
 
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -2803,14 +2804,6 @@ public class MainActivity extends AppCompatActivity implements Observer,
 }
 
 private class CustomWebViewClient extends WebViewClient {
-    @Override
-    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        // We can't easily modify headers here, but we can override the User-Agent per request
-        // by using a different approach: load the URL with custom headers.
-        // Instead, we'll set a global User-Agent at the WebView level.
-        return super.shouldInterceptRequest(view, request);
-    }
-
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         // Force the UA on each page start
