@@ -243,8 +243,43 @@ public class MainActivity extends AppCompatActivity implements Observer,
 
         @Override
         public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                // leave it empty for now
+            String url = request.getUrl().toString();
+
+            // Only intercept http/https requests
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
                 return super.shouldInterceptRequest(view, request);
+            }
+
+            try {
+                java.net.HttpURLConnection connection = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
+                connection.setRequestMethod("GET");
+
+                // Set ALL headers that a real desktop Chrome would send
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36");
+                connection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
+                connection.setRequestProperty("Accept-Language", "en-US,en;q=0.9");
+                connection.setRequestProperty("Accept-Encoding", "gzip, deflate, br");
+                connection.setRequestProperty("Sec-Fetch-Site", "none");
+                connection.setRequestProperty("Sec-Fetch-Mode", "navigate");
+                connection.setRequestProperty("Sec-Fetch-User", "?1");
+                connection.setRequestProperty("Sec-Fetch-Dest", "document");
+                connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
+                connection.setRequestProperty("Cache-Control", "max-age=0");
+                connection.setRequestProperty("Connection", "keep-alive");
+                connection.setConnectTimeout(15000);
+                connection.setReadTimeout(15000);
+
+                int responseCode = connection.getResponseCode();
+                if (responseCode == 200) {
+                    String contentType = connection.getContentType();
+                    java.io.InputStream inputStream = connection.getInputStream();
+                    return new WebResourceResponse(contentType, "utf-8", inputStream);
+                } else {
+                    return super.shouldInterceptRequest(view, request);
+                }
+            } catch (Exception e) {
+                return super.shouldInterceptRequest(view, request);
+            }
         }
     }
 
