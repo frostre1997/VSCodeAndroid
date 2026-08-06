@@ -82,21 +82,23 @@
         android:supportsRtl="true"
         android:networkSecurityConfig="@xml/network_security_config">
 
+        <!-- LAUNCH ACTIVITY (Splash Screen) -->
         <activity
             android:name=".LaunchActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustResize"
-            android:theme="@style/SplashTheme">
+            android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <!-- MAIN ACTIVITY (The main app) - FIXED: Uses NoActionBar -->
         <activity
             android:name=".MainActivity"
-            android:theme="@style/GoNativeTheme.NoActionBar"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustResize"
             android:exported="true"
