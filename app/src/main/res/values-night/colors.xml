@@ -20,4 +20,5 @@
   <color name="splash_background">#0A1A2F</color>
   <color name="progress_indicator">#007ACC</color>
   <color name="systemNavBarBackground">#0F0F0F</color>
+  <color name="icon_background">#000000</color>
 </resources>
