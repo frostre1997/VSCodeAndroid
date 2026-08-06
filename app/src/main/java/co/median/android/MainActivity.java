@@ -231,7 +231,15 @@ public class MainActivity extends AppCompatActivity implements Observer,
     private UrlLoader urlLoader;
     private boolean shouldRemoveSplash = false;
 
-    @Override
+    private class CustomWebViewClient extends WebViewClient {
+        @Override
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            String desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
+            view.getSettings().setUserAgentString(desktopUA);
+            super.onPageStarted(view, url, favicon);
+        }
+    }
+ 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
@@ -261,10 +269,8 @@ public class MainActivity extends AppCompatActivity implements Observer,
             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
        );
        getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
+    }
 
-
-        
-        
         final AppConfig appConfig = AppConfig.getInstance(this);
         GoNativeApplication application = (GoNativeApplication)getApplication();
         GoNativeWindowManager windowManager = application.getWindowManager();
