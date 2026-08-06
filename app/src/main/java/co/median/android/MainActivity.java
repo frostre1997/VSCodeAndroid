@@ -18,6 +18,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
+import android.graphics.Bitmap;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -43,11 +44,13 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
+import android.webkit.WebSettings;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -241,6 +244,9 @@ public class MainActivity extends AppCompatActivity implements Observer,
     
             String desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
             settings.setUserAgentString(desktopUA);
+
+            mWebview.setWebViewClient(new CustomWebViewClient());
+                
         }
 
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -2793,5 +2799,23 @@ public class MainActivity extends AppCompatActivity implements Observer,
 
     public UrlLoader getUrlLoader() {
         return urlLoader;
+    }
+}
+
+private class CustomWebViewClient extends WebViewClient {
+    @Override
+    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+        // We can't easily modify headers here, but we can override the User-Agent per request
+        // by using a different approach: load the URL with custom headers.
+        // Instead, we'll set a global User-Agent at the WebView level.
+        return super.shouldInterceptRequest(view, request);
+    }
+
+    @Override
+    public void onPageStarted(WebView view, String url, Bitmap favicon) {
+        // Force the UA on each page start
+        String desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
+        view.getSettings().setUserAgentString(desktopUA);
+        super.onPageStarted(view, url, favicon);
     }
 }
