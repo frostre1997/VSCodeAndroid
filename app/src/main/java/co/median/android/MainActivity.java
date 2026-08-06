@@ -50,6 +50,8 @@ import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebViewClient;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
@@ -238,8 +240,14 @@ public class MainActivity extends AppCompatActivity implements Observer,
             view.getSettings().setUserAgentString(desktopUA);
             super.onPageStarted(view, url, favicon);
         }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                // leave it empty for now
+                return super.shouldInterceptRequest(view, request);
+        }
     }
- 
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
