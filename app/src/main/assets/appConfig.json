@@ -10,27 +10,15 @@
     "replaceStrings": [],
     "nativeBridgeUrls": [],
     "languages": [
-      "ca",
-      "cs",
-      "de",
-      "es",
-      "fr",
-      "hu",
-      "it",
-      "ja",
-      "ko",
-      "pt-BR",
-      "ru",
-      "tr",
-      "zh-Hant"
+      "ca", "cs", "de", "es", "fr", "hu", "it", "ja", "ko", "pt-BR", "ru", "tr", "zh-Hant"
     ],
     "userAgentAdd": "median",
     "enableWindowOpen": true,
     "forceUserAgent": "",
     "publicKey": "bznlka",
     "deviceRegKey": "tj60gbp584ftu2d13xc0mfufeg",
-    "appName": "VSCode",
-    "initialUrl": "https://vscode.dev/?settings=workbench.startupEditor%3Dnone",
+    "appName": "Code",
+    "initialUrl": "https://vscode.dev/?settings=workbench.startupEditor%3Dnone&workbench.welcomePage.enabled=false",
     "androidPackageName": "com.vscode.android.app",
     "iosBundleId": "co.median.ios.bznlka",
     "keepScreenOn": true,
@@ -130,6 +118,12 @@
           "label": "VS Code Marketplace",
           "pagesToTrigger": "custom",
           "regex": "https?:\\/\\/([-\\w]+\\.)*(marketplace\\.visualstudio\\.com|gallerycdn\\.vsassets\\.io|vsassets\\.io)(\\/.*)?$"
+        },
+        {
+          "mode": "internal",
+          "label": "Open VSX Marketplace",
+          "pagesToTrigger": "custom",
+          "regex": "https?:\\/\\/([-\\w]+\\.)*(open-vsx\\.org)(\\/.*)?$"
         },
         {
           "mode": "appbrowser",
@@ -271,7 +265,7 @@
     "transitionInteractiveDelayMax": 0.2,
     "menuAnimationDuration": 0.15,
     "disableAnimations": true,
-    "hideWebviewAlpha": 0.5,
+    "hideWebviewAlpha": 0.0,
     "iosDarkMode": "auto",
     "iosTitleColor": "#1A1A1A",
     "iosTitleColorDark": "#FFFFFF",
@@ -348,7 +342,7 @@
     "androidActivityIndicatorColor": "#007ACC",
     "androidActivityIndicatorColorDark": "#007ACC",
     "forceViewportWidth": null,
-    "pinchToZoom": null,
+    "pinchToZoom": true,
     "iosDynamicType": null,
     "navigationTitleImageLocation": "assets/defaults/app-icon-placeholder.png",
     "navigationTitleImageLocationDark": "assets/defaults/app-icon-placeholder.png",
@@ -390,4 +384,4 @@
       "allowInsecure": null
     }
   }
-}
+    }
