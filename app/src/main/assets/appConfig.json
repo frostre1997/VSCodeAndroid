@@ -31,7 +31,7 @@
     "deviceRegKey": "tj60gbp584ftu2d13xc0mfufeg",
     "appName": "Code Mobile",
     "initialUrl": "https://vscode.dev/",
-    "androidPackageName": "co.median.android.bznlka",
+    "androidPackageName": "com.vscode.android.app",,
     "iosBundleId": "co.median.ios.bznlka",
     "keepScreenOn": true,
     "iosUserAgentAdd": "vscodestudio",
