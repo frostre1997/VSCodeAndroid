@@ -124,7 +124,7 @@
                     android:contentDescription="@string/app_logo"
                     android:padding="16dp"
                     android:scaleType="fitCenter"
-                    android:src="@mipmap/ic_sidebar_logo" />
+                    android:src="@mipmap/ic_launcher" />
 
                 <TextView
                     android:id="@+id/app_name"
