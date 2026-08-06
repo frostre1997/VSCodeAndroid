@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements Observer,
         ShakeDetector.Listener,
         ShakeDialogFragment.ShakeDialogListener {
     public static final String BROADCAST_RECEIVER_ACTION_WEBVIEW_LIMIT_REACHED = "io.gonative.android.MainActivity.Extra.BROADCAST_RECEIVER_ACTION_WEBVIEW_LIMIT_REACHED";
-    private static final String webviewDatabaseSubdir = "webviewDatabase";
+    private static final String webviewDatabaseSubdir = "webviewDatabase"; 
     private static final String TAG = MainActivity.class.getName();
     public static final String INTENT_TARGET_URL = "targetUrl";
     public static final String EXTRA_WEBVIEW_WINDOW_OPEN = "io.gonative.android.MainActivity.Extra.WEBVIEW_WINDOW_OPEN";
@@ -261,6 +261,8 @@ public class MainActivity extends AppCompatActivity implements Observer,
             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
        );
        getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
+
+
         
         
         final AppConfig appConfig = AppConfig.getInstance(this);
@@ -2800,15 +2802,5 @@ public class MainActivity extends AppCompatActivity implements Observer,
 
     public UrlLoader getUrlLoader() {
         return urlLoader;
-    }
-}
-
-private class CustomWebViewClient extends WebViewClient {
-    @Override
-    public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        // Force the UA on each page start
-        String desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
-        view.getSettings().setUserAgentString(desktopUA);
-        super.onPageStarted(view, url, favicon);
     }
 }
