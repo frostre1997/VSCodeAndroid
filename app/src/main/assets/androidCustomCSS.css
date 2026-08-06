@@ -45,3 +45,15 @@ body {
     padding: 0 !important;
     overflow-x: hidden !important;
 }
+
+/* ===== ZEN MODE FIXES ===== */
+/* Prevent the menubar from reappearing in Zen mode */
+.zen-mode .part.menubar {
+    display: none !important;
+}
+
+/* Ensure Zen mode fills the full screen without extra padding */
+.zen-mode .part.editor {
+    top: 0 !important;
+    height: 100% !important;
+}
