@@ -233,16 +233,15 @@ public class MainActivity extends AppCompatActivity implements Observer,
         super.onCreate(savedInstanceState);
         
         // ----- FORCE DESKTOP USER-AGENT TO UNBLOCK CDN -----
-        WebView webView = findViewById(R.id.webView);   // your WebView ID
-            if (webView != null) {
-            WebSettings settings = webView.getSettings();
+        WebView webView = findViewById(R.id.webView);
+            if (mwebView != null) {
+            WebSettings settings = mwebView.getSettings();
             settings.setDomStorageEnabled(true);
             settings.setJavaScriptEnabled(true);
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-    
-        // Replace the UA with a pure desktop Chrome one
+ 
             String desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/133.0.0.0 Safari/537.36";
-               settings.setUserAgentString(desktopUA);
+            settings.setUserAgentString(desktopUA);
         }
 
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
