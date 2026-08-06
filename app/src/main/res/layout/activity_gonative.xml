@@ -1,8 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <co.median.android.widget.GoNativeDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <!-- The main content view -->
     <RelativeLayout
         android:layout_width="match_parent"
@@ -13,7 +15,8 @@
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:visibility="gone">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
@@ -65,7 +68,7 @@
             android:layout_above="@id/bottom_navigation"
             android:layout_alignWithParentIfMissing="true"
             android:background="?android:attr/colorBackground"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <co.median.android.widget.MedianProgressView
             android:id="@+id/progress"
@@ -96,6 +99,7 @@
             android:visibility="invisible" />
 
     </RelativeLayout>
+
     <!-- The navigation drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/left_drawer"
