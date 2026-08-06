@@ -2,7 +2,6 @@ package co.median.android;
 
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -15,7 +14,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -196,14 +194,7 @@ public class ActionManager {
     }
 
     public void showTextActionBarTitle(CharSequence title) {
-        TextView textView = new TextView(activity);
-        textView.setText(TextUtils.isEmpty(title) ? activity.getTitle() : title);
-        textView.setTextSize(18);
-        textView.setTypeface(null, Typeface.BOLD);
-        textView.setMaxLines(1);
-        textView.setEllipsize(TextUtils.TruncateAt.END);
-        textView.setTextColor(colorForeground);
-        showTitleView(textView);
+        showTitleView(actionBarImageTitle);
     }
 
     public void showTitleView(View titleView) {
