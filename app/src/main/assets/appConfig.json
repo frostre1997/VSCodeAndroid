@@ -17,7 +17,7 @@
     "forceUserAgent": "",
     "publicKey": "bznlka",
     "deviceRegKey": "tj60gbp584ftu2d13xc0mfufeg",
-    "appName": "Code",
+    "appName": "Visual Studio Code",
     "initialUrl": "https://vscode.dev/?settings=workbench.startupEditor%3Dnone&workbench.welcomePage.enabled=false",
     "androidPackageName": "com.vscode.android.app",
     "iosBundleId": "co.median.ios.bznlka",
