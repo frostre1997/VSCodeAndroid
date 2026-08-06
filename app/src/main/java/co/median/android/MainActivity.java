@@ -301,6 +301,26 @@ public class MainActivity extends AppCompatActivity implements Observer,
             }
         }
 
+        // ----- LOCAL PROXY SERVER TO BYPASS CDN BLOCK -----
+        LocalProxyServer server = new LocalProxyServer();
+        try {
+            server.start();
+            Log.d("Proxy", "Proxy server started on port 8080");
+        } catch (Exception e) {
+            Log.e("Proxy", "Failed to start proxy: " + e.getMessage());
+            // Fallback: if proxy fails, try direct load (but likely blocked)
+            mWebview.loadUrl("https://vscode.dev");
+            return;
+        }
+
+        // Wait a moment for the server to fully initialize, then load the proxy URL
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (mWebview != null) {
+                // Load VS Code via the local proxy
+                mWebview.loadUrl("http://localhost:8080/");
+            }
+        }, 300); // 300ms delay ensures the server is ready
+            
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
 
         getWindow().getDecorView().setSystemUiVisibility(
