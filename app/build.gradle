@@ -169,6 +169,7 @@ dependencies {
     implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation "co.median.android:icons:$iconsVersion"
     implementation "co.median.android:core:$coreVersion"
+	implementation 'org.nanohttpd:nanohttpd:2.3.1'
     /**** end all apps ****/
 
     /**** add-on module dependencies ****/
