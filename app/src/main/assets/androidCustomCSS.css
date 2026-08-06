@@ -28,3 +28,20 @@ a:focus, button:focus, input:focus, textarea:focus {
     top: 0 !important;
     height: 100% !important;
 }
+
+/* Remove the tiny white line on the right */
+.monaco-workbench .part.editor .monaco-scrollable-element > .scrollbar {
+    display: none !important;
+}
+
+/* Or if it's a border */
+.monaco-workbench .part.editor {
+    border-right: none !important;
+}
+
+/* Remove any extra whitespace */
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+}
