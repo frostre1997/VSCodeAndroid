@@ -16,3 +16,15 @@ a:focus, button:focus, input:focus, textarea:focus {
     margin-top: 4px;
   }
 }
+
+/* Hide the entire top bar (title + menu) */
+.monaco-workbench .part.titlebar,
+.monaco-workbench .part.menubar {
+    display: none !important;
+}
+
+/* Adjust the editor to fill the space */
+.monaco-workbench .part.editor {
+    top: 0 !important;
+    height: 100% !important;
+}
