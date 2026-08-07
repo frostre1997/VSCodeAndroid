@@ -122,8 +122,8 @@ public class GitService {
             for (String path : status.getModified()) {
                 GitFileStatus fs = new GitFileStatus();
                 fs.path = path;
-                fs.indexStatus = 'M';
-                fs.worktreeStatus = ' ';
+                fs.indexStatus = "M";
+                fs.worktreeStatus = " ";
                 fs.untracked = false;
                 fs.conflicted = false;
                 result.add(fs);
@@ -131,8 +131,8 @@ public class GitService {
             for (String path : status.getAdded()) {
                 GitFileStatus fs = new GitFileStatus();
                 fs.path = path;
-                fs.indexStatus = 'A';
-                fs.worktreeStatus = ' ';
+                fs.indexStatus = "A";
+                fs.worktreeStatus = " ";
                 fs.untracked = false;
                 fs.conflicted = false;
                 result.add(fs);
@@ -140,8 +140,8 @@ public class GitService {
             for (String path : status.getRemoved()) {
                 GitFileStatus fs = new GitFileStatus();
                 fs.path = path;
-                fs.indexStatus = 'D';
-                fs.worktreeStatus = ' ';
+                fs.indexStatus = "D";
+                fs.worktreeStatus = " ";
                 fs.untracked = false;
                 fs.conflicted = false;
                 result.add(fs);
@@ -149,8 +149,8 @@ public class GitService {
             for (String path : status.getChanged()) {
                 GitFileStatus fs = new GitFileStatus();
                 fs.path = path;
-                fs.indexStatus = 'C';
-                fs.worktreeStatus = ' ';
+                fs.indexStatus = "C";
+                fs.worktreeStatus = " ";
                 fs.untracked = false;
                 fs.conflicted = false;
                 result.add(fs);
@@ -158,8 +158,8 @@ public class GitService {
             for (String path : status.getUntracked()) {
                 GitFileStatus fs = new GitFileStatus();
                 fs.path = path;
-                fs.indexStatus = ' ';
-                fs.worktreeStatus = '?';
+                fs.indexStatus =" ";
+                fs.worktreeStatus = "?";
                 fs.untracked = true;
                 fs.conflicted = false;
                 result.add(fs);
@@ -167,8 +167,8 @@ public class GitService {
             for (String path : status.getConflicting()) {
                 GitFileStatus fs = new GitFileStatus();
                 fs.path = path;
-                fs.indexStatus = ' ';
-                fs.worktreeStatus = ' ';
+                fs.indexStatus = " ";
+                fs.worktreeStatus = " ";
                 fs.untracked = false;
                 fs.conflicted = true;
                 result.add(fs);
