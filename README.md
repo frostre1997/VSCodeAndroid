@@ -13,23 +13,24 @@ An open-source Android client for [vscode.dev](https://vscode.dev/) — a fully 
 - **Run Code**: Execute code on your device, with support for Python, JavaScript, and more.
 - **Full VS Code functionality**: Almost all VS Code features are available.
 
-## Feature status
+## Feature Status
 
 | Feature | Status |
 | --- | --- |
-| Code editing (JS, Python, HTML, CSS, …) | ✅ Fully working |
-| Syntax highlighting | ✅ Fully working |
-| Themes (dark/light) | ✅ Fully working |
-| File explorer | ✅ Fully working |
-| Search & Replace | ✅ Fully working |
-| Extensions (themes, linters, formatters) | ✅ Working (Open VSX marketplace now loads in the WebView) |
-| Git (add, commit, push, pull) | ✅ Native Git engine (JGit) — full Source Control UI with clone, branches, history, diffs, credentials & SSH |
-| Marketplace | ✅ Open VSX (`open-vsx.org`) and its CDN load in-app; GitHub auth for publisher verification completes in-app |
-| Terminal | ❌ Impossible — needs a server-side backend |
-| Python / C++ / Java language servers | ❌ Impossible — needs Node/WASM language server backends |
-| Remote / Codespaces | ⚠️ Partially — GitHub auth works, Codespaces depends on the remote service |
+| Code editing (JS, Python, HTML, CSS, …) | Fully working |
+| Syntax highlighting | Fully working |
+| Themes (dark/light) | Fully working |
+| File explorer | Fully working |
+| Search & Replace | Fully working |
+| Extensions (themes, linters, formatters) | Working (Open VSX marketplace loads in WebView) |
+| Marketplace (extension details) | Working (fixed with `?vscode-coi=off`) |
+| Git (clone, add, commit, push, pull, branch, diff, log) | Fully working (native JGit engine with SSH and HTTPS credentials) |
+| CDN / Resource blocking | Fixed (direct WebView with desktop UA + COEP/COOP disabled) |
+| Terminal | requires a server-side backend |
+| Python / C++ / Java language servers | needs Node/WASM language server backends |
+| Remote / Codespaces | Partially — GitHub auth works, Codespaces depends on the remote service |
 
-## The redesign
+## The Redesign
 
 - **New identity** — an original blue-to-navy "code chevron" icon, matching splash screen and offline page.
 - **VSCode-inspired palette** — accent `#007ACC`, dark `#1E1E1E` / `#252526` surfaces, deep navy `#0A1A2F` splash.
@@ -37,6 +38,8 @@ An open-source Android client for [vscode.dev](https://vscode.dev/) — a fully 
 - **Web UI refresh** — `app/src/main/assets/customCSS.css` (and `androidCustomCSS.css`) are injected into every `vscode.dev` page to align the accent color, polish the chrome and enlarge touch targets on mobile.
 - **Fixed navigation drawer** — no longer opens full-screen (capped at 320dp).
 - **Native Source Control** — a JGit-backed engine with a VS Code–styled Source Control UI (tap the Git FAB, bottom-right). Clone/init/open repositories, stage & commit, push/pull/fetch, branches, history, per-file diffs, HTTPS credentials and SSH keys are handled natively and synced to the vscode.dev Source Control badge.
+- **Direct WebView loading** — the app now loads `vscode.dev` directly in the WebView with a desktop User-Agent and the `?vscode-coi=off` parameter to disable cross-origin isolation, which permanently fixes marketplace and CDN blocking.
+- **Fullscreen mode** — system bars are hidden for an immersive editing experience.
 
 ## Build & install
 
