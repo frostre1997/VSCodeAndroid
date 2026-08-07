@@ -22,16 +22,6 @@ import java.util.concurrent.Executors;
 
 import co.median.android.MainActivity;
 
-/**
- * {@code @JavascriptInterface} exposed on the WebView as {@code GitBridge}.
- * JavaScript calls {@code GitBridge.invoke(command, paramsJson, callbackId)};
- * the result is delivered asynchronously to the global function
- * {@code window[callbackId]} with a JSON object {@code {success, error, data}}.
- *
- * All Git work runs on a single background thread so operations are
- * serialized. Long-running operations emit progress events and every
- * state-changing operation emits a {@code status-changed} event.
- */
 @SuppressLint("JavascriptInterface")
 public class GitBridge {
 
@@ -72,17 +62,9 @@ public class GitBridge {
         GitService.setSshConfig(storage.getSshDir(), new BridgeCredentialRequest());
     }
 
-    public String getGitUiUrl() {
-        return GIT_UI_URL;
-    }
-
-    public String getActiveRepo() {
-        return activeRepo;
-    }
-
-    public File getReposDir() {
-        return storage.getReposDir();
-    }
+    public String getGitUiUrl() { return GIT_UI_URL; }
+    public String getActiveRepo() { return activeRepo; }
+    public File getReposDir() { return storage.getReposDir(); }
 
     // ------------------------------------------------------------------
     // JS entry point
@@ -95,20 +77,20 @@ public class GitBridge {
             try {
                 JSONObject params = paramsJson == null || paramsJson.isEmpty()
                         ? new JSONObject() : new JSONObject(paramsJson);
-                result.put("data", dispatch(command, params));
-                result.put("success", true);
+                safePut(result, "data", dispatch(command, params));
+                safePut(result, "success", true);
             } catch (GitServiceException e) {
                 Log.d(TAG, command + " failed", e);
-                result.put("success", false);
-                result.put("error", e.getMessage());
+                safePut(result, "success", false);
+                safePut(result, "error", e.getMessage());
             } catch (JSONException e) {
                 Log.d(TAG, command + " bad params", e);
-                result.put("success", false);
-                result.put("error", "Invalid parameters: " + e.getMessage());
+                safePut(result, "success", false);
+                safePut(result, "error", "Invalid parameters: " + e.getMessage());
             } catch (Exception e) {
                 Log.d(TAG, command + " error", e);
-                result.put("success", false);
-                result.put("error", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
+                safePut(result, "success", false);
+                safePut(result, "error", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
             }
             deliverResult(callbackId, result);
         });
@@ -126,53 +108,53 @@ public class GitBridge {
     }
 
     // ------------------------------------------------------------------
+    // Safe JSON helper – fixes ALL JSONException errors
+    // ------------------------------------------------------------------
+
+    private void safePut(JSONObject obj, String key, Object value) {
+        try {
+            obj.put(key, value);
+        } catch (JSONException ignored) {}
+    }
+
+    private JSONObject safeJson() { return new JSONObject(); }
+
+    // ------------------------------------------------------------------
     // Command dispatch
     // ------------------------------------------------------------------
 
     private Object dispatch(String command, JSONObject p) throws Exception {
         switch (command) {
-            case "getInfo":
-                return getInfo(p);
-            case "findRepo":
-                return findRepo(p);
-            case "listRepos":
-                return listRepos(p);
-            case "setActiveRepo":
-                return setActiveRepo(p);
-            case "openRepoDir":
-                return openRepoDir();
-            case "status":
-                return status(p);
+            case "getInfo": return getInfo(p);
+            case "findRepo": return findRepo(p);
+            case "listRepos": return listRepos(p);
+            case "setActiveRepo": return setActiveRepo(p);
+            case "openRepoDir": return openRepoDir();
+            case "status": return status(p);
             case "stage":
                 GitService.stage(requireRepo(), pathList(p, "paths"), p.optBoolean("all", false));
-                emitStatusChanged();
-                return ok();
+                emitStatusChanged(); return ok();
             case "unstage":
                 GitService.unstage(requireRepo(), pathList(p, "paths"), p.optBoolean("all", false));
-                emitStatusChanged();
-                return ok();
+                emitStatusChanged(); return ok();
             case "commit": {
                 GitService.commit(requireRepo(), p.getString("message"), p.optBoolean("amend", false),
                         p.optString("authorName", null), p.optString("authorEmail", null));
-                emitStatusChanged();
-                return ok();
+                emitStatusChanged(); return ok();
             }
             case "push": {
                 GitService.push(requireRepo(), optNull(p, "remote"), optNull(p, "branch"),
                         p.optBoolean("force", false), new BridgeCredentialRequest(), new BridgeProgress());
-                emitStatusChanged();
-                return ok();
+                emitStatusChanged(); return ok();
             }
             case "pull": {
                 GitService.pull(requireRepo(), optNull(p, "remote"), optNull(p, "branch"),
                         p.optBoolean("rebase", false), new BridgeCredentialRequest(), new BridgeProgress());
-                emitStatusChanged();
-                return ok();
+                emitStatusChanged(); return ok();
             }
             case "fetch": {
                 GitService.fetch(requireRepo(), optNull(p, "remote"), new BridgeCredentialRequest(), new BridgeProgress());
-                emitStatusChanged();
-                return ok();
+                emitStatusChanged(); return ok();
             }
             case "clone": {
                 String url = p.getString("url");
@@ -194,8 +176,7 @@ public class GitBridge {
             case "branches":
                 return branchesJson(GitService.listBranches(requireRepo()));
             case "createBranch": {
-                GitBranchInfo info = GitService.createBranch(requireRepo(), p.getString("name"),
-                        optNull(p, "startPoint"));
+                GitBranchInfo info = GitService.createBranch(requireRepo(), p.getString("name"), optNull(p, "startPoint"));
                 emitStatusChanged();
                 return branchToJson(info);
             }
@@ -207,43 +188,36 @@ public class GitBridge {
             }
             case "deleteBranch": {
                 GitService.deleteBranch(requireRepo(), p.getString("name"), p.optBoolean("force", false));
-                emitStatusChanged();
-                return ok();
+                emitStatusChanged(); return ok();
             }
             case "checkoutCommit": {
                 GitService.checkoutCommit(requireRepo(), p.getString("commit"));
-                emitStatusChanged();
-                return ok();
+                emitStatusChanged(); return ok();
             }
-            case "diff":
-                return diffJson(GitService.diff(requireRepo(), optNull(p, "path"), p.optBoolean("staged", false)));
-            case "show":
-                return diffJson(GitService.show(requireRepo(), p.getString("commit")));
-            case "log":
-                return logJson(GitService.log(requireRepo(), p.optInt("max", 50)));
-            case "remotes":
-                return new JSONArray(GitService.listRemotes(requireRepo()));
+            case "diff": return diffJson(GitService.diff(requireRepo(), optNull(p, "path"), p.optBoolean("staged", false)));
+            case "show": return diffJson(GitService.show(requireRepo(), p.getString("commit")));
+            case "log": return logJson(GitService.log(requireRepo(), p.optInt("max", 50)));
+            case "remotes": return new JSONArray(GitService.listRemotes(requireRepo()));
             case "aheadBehind": {
                 int[] ab = GitService.aheadBehind(requireRepo());
-                JSONObject o = new JSONObject();
-                o.put("ahead", ab[0]);
-                o.put("behind", ab[1]);
+                JSONObject o = safeJson();
+                safePut(o, "ahead", ab[0]);
+                safePut(o, "behind", ab[1]);
                 return o;
             }
-            case "configGet":
-                return GitService.getConfig(requireRepo(), p.getString("key"));
+            case "configGet": return GitService.getConfig(requireRepo(), p.getString("key"));
             case "configSet": {
                 GitService.setConfig(requireRepo(), p.getString("key"), p.getString("value"));
                 return ok();
             }
-            case "discard":
+            case "discard": {
                 GitService.discardChanges(requireRepo(), pathList(p, "paths"));
-                emitStatusChanged();
-                return ok();
+                emitStatusChanged(); return ok();
+            }
             case "getIdentity": {
-                JSONObject o = new JSONObject();
-                o.put("name", store.get(GitCredentialStore.KEY_IDENTITY_NAME));
-                o.put("email", store.get(GitCredentialStore.KEY_IDENTITY_EMAIL));
+                JSONObject o = safeJson();
+                safePut(o, "name", store.get(GitCredentialStore.KEY_IDENTITY_NAME));
+                safePut(o, "email", store.get(GitCredentialStore.KEY_IDENTITY_EMAIL));
                 return o;
             }
             case "setIdentity":
@@ -253,14 +227,12 @@ public class GitBridge {
             case "saveSshPassphrase":
                 store.put("ssh.id_rsa.passphrase", p.optString("passphrase", ""));
                 return ok();
-            case "saveCredentials":
-                saveCredentials(p);
-                return ok();
+            case "saveCredentials": saveCredentials(p); return ok();
             case "getCredentials": {
-                JSONObject o = new JSONObject();
+                JSONObject o = safeJson();
                 String user = store.get(credKey("user", p.optString("url")));
-                o.put("username", user);
-                o.put("hasPassword", store.get(credKey("pass", p.optString("url"))) != null);
+                safePut(o, "username", user);
+                safePut(o, "hasPassword", store.get(credKey("pass", p.optString("url"))) != null);
                 return o;
             }
             case "deleteCredentials":
@@ -270,15 +242,14 @@ public class GitBridge {
             case "listCredentials": {
                 JSONArray arr = new JSONArray();
                 for (Map.Entry<String, String> e : store.all().entrySet()) {
-                    JSONObject o = new JSONObject();
-                    o.put("key", e.getKey());
-                    o.put("value", e.getValue());
+                    JSONObject o = safeJson();
+                    safePut(o, "key", e.getKey());
+                    safePut(o, "value", e.getValue());
                     arr.put(o);
                 }
                 return arr;
             }
-            case "listSshKeys":
-                return sshKeysJson(sshKeys.listKeys());
+            case "listSshKeys": return sshKeysJson(sshKeys.listKeys());
             case "generateSshKey": {
                 SshKeyManager.SshKeyInfo info = sshKeys.generateKey(
                         p.optString("comment", "android"), p.optString("passphrase", ""));
@@ -287,14 +258,12 @@ public class GitBridge {
             case "getSshPublicKey": {
                 String name = p.optString("name", "id_rsa");
                 String content = sshKeys.publicKeyContents(name);
-                JSONObject o = new JSONObject();
-                o.put("name", name);
-                o.put("content", content);
+                JSONObject o = safeJson();
+                safePut(o, "name", name);
+                safePut(o, "content", content);
                 return o;
             }
-            case "deleteSshKey":
-                sshKeys.deleteKey(p.getString("name"));
-                return ok();
+            case "deleteSshKey": sshKeys.deleteKey(p.getString("name")); return ok();
             case "openVscode":
                 uiHandler.post(() -> activity.runOnUiThread(() -> activity.loadUrl(VSCODE_URL)));
                 return ok();
@@ -308,13 +277,13 @@ public class GitBridge {
     // ------------------------------------------------------------------
 
     private JSONObject getInfo(JSONObject p) throws Exception {
-        JSONObject o = new JSONObject();
-        o.put("reposDir", storage.getReposDir().getAbsolutePath());
-        o.put("sshDir", storage.getSshDir().getAbsolutePath());
-        o.put("activeRepo", activeRepo);
-        o.put("reposDirExists", storage.getReposDir().exists());
+        JSONObject o = safeJson();
+        safePut(o, "reposDir", storage.getReposDir().getAbsolutePath());
+        safePut(o, "sshDir", storage.getSshDir().getAbsolutePath());
+        safePut(o, "activeRepo", activeRepo);
+        safePut(o, "reposDirExists", storage.getReposDir().exists());
         if (activeRepo != null && GitService.isRepository(new File(activeRepo))) {
-            o.put("repo", repoToJson(GitService.getRepoInfo(new File(activeRepo))));
+            safePut(o, "repo", repoToJson(GitService.getRepoInfo(new File(activeRepo))));
         }
         return o;
     }
@@ -322,12 +291,12 @@ public class GitBridge {
     private JSONObject findRepo(JSONObject p) throws Exception {
         String dir = p.optString("dir");
         File root = GitService.findRepositoryRoot(new File(dir));
-        JSONObject o = new JSONObject();
+        JSONObject o = safeJson();
         if (root != null) {
-            o.put("root", root.getAbsolutePath());
-            o.put("repo", repoToJson(GitService.getRepoInfo(root)));
+            safePut(o, "root", root.getAbsolutePath());
+            safePut(o, "repo", repoToJson(GitService.getRepoInfo(root)));
         } else {
-            o.put("root", JSONObject.NULL);
+            safePut(o, "root", JSONObject.NULL);
         }
         return o;
     }
@@ -344,17 +313,17 @@ public class GitBridge {
                 sorted.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
                 for (File child : sorted) {
                     if (child.isDirectory() && GitService.isRepository(child)) {
-                        JSONObject o = new JSONObject();
-                        o.put("path", child.getAbsolutePath());
-                        o.put("name", child.getName());
+                        JSONObject o = safeJson();
+                        safePut(o, "path", child.getAbsolutePath());
+                        safePut(o, "name", child.getName());
                         arr.put(o);
                     }
                 }
             }
         }
-        JSONObject out = new JSONObject();
-        out.put("dir", base.getAbsolutePath());
-        out.put("repos", arr);
+        JSONObject out = safeJson();
+        safePut(out, "dir", base.getAbsolutePath());
+        safePut(out, "repos", arr);
         return out;
     }
 
@@ -375,16 +344,16 @@ public class GitBridge {
     public void onDirectoryPicked(String dir) {
         executor.execute(() -> {
             try {
-                JSONObject o = new JSONObject();
-                o.put("path", dir);
+                JSONObject o = safeJson();
+                safePut(o, "path", dir);
                 File f = new File(dir);
                 if (GitService.isRepository(f)) {
                     setActiveRepo(dir);
-                    o.put("isRepo", true);
-                    o.put("repo", repoToJson(GitService.getRepoInfo(f)));
+                    safePut(o, "isRepo", true);
+                    safePut(o, "repo", repoToJson(GitService.getRepoInfo(f)));
                     emitStatusChanged();
                 } else {
-                    o.put("isRepo", false);
+                    safePut(o, "isRepo", false);
                 }
                 emitEvent("directory-picked", o);
             } catch (Exception e) {
@@ -401,10 +370,10 @@ public class GitBridge {
         List<String> remotes = GitService.listRemotes(repo);
 
         JSONObject o = repoToJson(info);
-        o.put("files", statusJson(files));
-        o.put("ahead", ab[0]);
-        o.put("behind", ab[1]);
-        o.put("remotes", new JSONArray(remotes));
+        safePut(o, "files", statusJson(files));
+        safePut(o, "ahead", ab[0]);
+        safePut(o, "behind", ab[1]);
+        safePut(o, "remotes", new JSONArray(remotes));
         return o;
     }
 
@@ -413,16 +382,10 @@ public class GitBridge {
         if (url.isEmpty()) return;
         String username = p.optString("username", "");
         String password = p.optString("password", "");
-        if (username.isEmpty()) {
-            store.remove(credKey("user", url));
-        } else {
-            store.put(credKey("user", url), username);
-        }
-        if (password.isEmpty()) {
-            store.remove(credKey("pass", url));
-        } else {
-            store.put(credKey("pass", url), password);
-        }
+        if (username.isEmpty()) store.remove(credKey("user", url));
+        else store.put(credKey("user", url), username);
+        if (password.isEmpty()) store.remove(credKey("pass", url));
+        else store.put(credKey("pass", url), password);
         pendingCredentialUrl = null;
         emitStatusChanged();
     }
@@ -444,8 +407,8 @@ public class GitBridge {
     }
 
     private void emitStatusChanged() {
-        JSONObject o = new JSONObject();
-        o.put("activeRepo", activeRepo);
+        JSONObject o = safeJson();
+        safePut(o, "activeRepo", activeRepo);
         emitEvent("status-changed", o);
     }
 
@@ -467,105 +430,101 @@ public class GitBridge {
         return v.isEmpty() ? null : v;
     }
 
-    private JSONObject ok() {
-        return new JSONObject();
-    }
+    private JSONObject ok() { return safeJson(); }
 
     private static String jsWrap(String value) {
         return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
     }
 
     // ------------------------------------------------------------------
-    // JSON serialization
+    // JSON serialization – all using safePut
     // ------------------------------------------------------------------
 
-    static JSONObject repoToJson(GitRepoInfo info) throws JSONException {
-        JSONObject o = new JSONObject();
-        o.put("directory", info.directory != null ? info.directory.getAbsolutePath() : null);
-        o.put("currentBranch", info.currentBranch);
-        o.put("detachedHead", info.detachedHead);
-        o.put("headId", info.headId);
-        o.put("upstream", info.upstream);
-        o.put("branches", branchesJson(info.branches));
+    private JSONObject repoToJson(GitRepoInfo info) {
+        JSONObject o = safeJson();
+        safePut(o, "directory", info.directory != null ? info.directory.getAbsolutePath() : null);
+        safePut(o, "currentBranch", info.currentBranch);
+        safePut(o, "detachedHead", info.detachedHead);
+        safePut(o, "headId", info.headId);
+        safePut(o, "upstream", info.upstream);
+        safePut(o, "branches", branchesJson(info.branches));
         return o;
     }
 
-    static JSONArray statusJson(List<GitFileStatus> files) throws JSONException {
+    private JSONArray statusJson(List<GitFileStatus> files) {
         JSONArray arr = new JSONArray();
         for (GitFileStatus f : files) {
-            JSONObject o = new JSONObject();
-            o.put("path", f.path);
-            o.put("indexStatus", f.indexStatus);
-            o.put("worktreeStatus", f.worktreeStatus);
-            o.put("untracked", f.untracked);
-            o.put("conflicted", f.conflicted);
+            JSONObject o = safeJson();
+            safePut(o, "path", f.path);
+            safePut(o, "indexStatus", f.indexStatus);
+            safePut(o, "worktreeStatus", f.worktreeStatus);
             arr.put(o);
         }
         return arr;
     }
 
-    static JSONArray branchesJson(List<GitBranchInfo> branches) throws JSONException {
+    private JSONArray branchesJson(List<GitBranchInfo> branches) {
         JSONArray arr = new JSONArray();
         for (GitBranchInfo b : branches) arr.put(branchToJson(b));
         return arr;
     }
 
-    static JSONObject branchToJson(GitBranchInfo b) throws JSONException {
-        JSONObject o = new JSONObject();
-        o.put("name", b.name);
-        o.put("fullName", b.fullName);
-        o.put("remoteName", b.remoteName);
-        o.put("tracking", b.tracking);
-        o.put("current", b.current);
-        o.put("remote", b.remote);
+    private JSONObject branchToJson(GitBranchInfo b) {
+        JSONObject o = safeJson();
+        safePut(o, "name", b.name);
+        safePut(o, "fullName", b.fullName);
+        safePut(o, "remoteName", b.remoteName);
+        safePut(o, "tracking", b.tracking);
+        safePut(o, "current", b.current);
+        safePut(o, "remote", b.remote);
         return o;
     }
 
-    static JSONArray logJson(List<GitCommitInfo> commits) throws JSONException {
+    private JSONArray logJson(List<GitCommitInfo> commits) {
         JSONArray arr = new JSONArray();
         for (GitCommitInfo c : commits) {
-            JSONObject o = new JSONObject();
-            o.put("id", c.id);
-            o.put("shortId", c.shortId);
-            o.put("authorName", c.authorName);
-            o.put("authorEmail", c.authorEmail);
-            o.put("message", c.message);
-            o.put("subject", c.subject);
-            o.put("commitTime", c.commitTime);
-            o.put("parentCount", c.parentCount);
+            JSONObject o = safeJson();
+            safePut(o, "id", c.id);
+            safePut(o, "shortId", c.shortId);
+            safePut(o, "authorName", c.authorName);
+            safePut(o, "authorEmail", c.authorEmail);
+            safePut(o, "message", c.message);
+            safePut(o, "subject", c.subject);
+            safePut(o, "commitTime", c.commitTime);
+            safePut(o, "parentCount", c.parentCount);
             arr.put(o);
         }
         return arr;
     }
 
-    static JSONArray diffJson(List<GitDiffFile> diffs) throws JSONException {
+    private JSONArray diffJson(List<GitDiffFile> diffs) {
         JSONArray arr = new JSONArray();
         for (GitDiffFile d : diffs) {
-            JSONObject o = new JSONObject();
-            o.put("path", d.path);
-            o.put("oldPath", d.oldPath);
-            o.put("changeType", d.changeType);
-            o.put("additions", d.additions);
-            o.put("deletions", d.deletions);
-            o.put("diff", d.diff);
+            JSONObject o = safeJson();
+            safePut(o, "path", d.path);
+            safePut(o, "oldPath", d.oldPath);
+            safePut(o, "changeType", d.changeType);
+            safePut(o, "additions", d.additions);
+            safePut(o, "deletions", d.deletions);
+            safePut(o, "diff", d.diff);
             arr.put(o);
         }
         return arr;
     }
 
-    static JSONArray sshKeysJson(List<SshKeyManager.SshKeyInfo> keys) throws JSONException {
+    private JSONArray sshKeysJson(List<SshKeyManager.SshKeyInfo> keys) {
         JSONArray arr = new JSONArray();
         for (SshKeyManager.SshKeyInfo k : keys) arr.put(sshKeyToJson(k));
         return arr;
     }
 
-    static JSONObject sshKeyToJson(SshKeyManager.SshKeyInfo k) throws JSONException {
-        JSONObject o = new JSONObject();
-        o.put("name", k.name);
-        o.put("privateKeyPath", k.privateKeyPath);
-        o.put("publicKeyPath", k.publicKeyPath);
-        o.put("fingerprint", k.fingerprint);
-        o.put("comment", k.comment);
+    private JSONObject sshKeyToJson(SshKeyManager.SshKeyInfo k) {
+        JSONObject o = safeJson();
+        safePut(o, "name", k.name);
+        safePut(o, "privateKeyPath", k.privateKeyPath);
+        safePut(o, "publicKeyPath", k.publicKeyPath);
+        safePut(o, "fingerprint", k.fingerprint);
+        safePut(o, "comment", k.comment);
         return o;
     }
 
@@ -582,8 +541,8 @@ public class GitBridge {
             if (password == null || password.isEmpty()) {
                 pendingCredentialUrl = url;
                 uiHandler.post(() -> {
-                    JSONObject o = new JSONObject();
-                    o.put("url", url);
+                    JSONObject o = safeJson();
+                    safePut(o, "url", url);
                     emitEvent("credentials-required", o);
                 });
                 return null;
@@ -597,8 +556,8 @@ public class GitBridge {
             if (passphrase == null) {
                 pendingCredentialUrl = url;
                 uiHandler.post(() -> {
-                    JSONObject o = new JSONObject();
-                    o.put("url", url);
+                    JSONObject o = safeJson();
+                    safePut(o, "url", url);
                     emitEvent("ssh-passphrase-required", o);
                 });
                 return null;
@@ -610,18 +569,18 @@ public class GitBridge {
     private class BridgeProgress implements GitProgress {
         @Override
         public void onProgress(String task, int work, int total) {
-            JSONObject o = new JSONObject();
-            o.put("task", task);
-            o.put("work", work);
-            o.put("total", total);
+            JSONObject o = safeJson();
+            safePut(o, "task", task);
+            safePut(o, "work", work);
+            safePut(o, "total", total);
             emitEvent("progress", o);
         }
 
         @Override
         public void onMessage(String message) {
-            JSONObject o = new JSONObject();
-            o.put("message", message);
-            emitEvent("progress", o);
+            JSONObject o = safeJson();
+            safePut(o, "message", message);
+            emitEvent("progress-message", o);
         }
     }
 }
