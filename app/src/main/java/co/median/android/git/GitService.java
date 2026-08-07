@@ -33,11 +33,9 @@ import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
-import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.EmptyTreeIterator;
-import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 
 import java.io.ByteArrayOutputStream;
@@ -56,22 +54,13 @@ public class GitService {
     private static final String EMPTY_TREE_ID = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
     private static final Lock REPO_LOCK = new ReentrantLock();
 
-    // ------------------------------------------------------------------
-    // SSH configuration
-    // ------------------------------------------------------------------
-
     private static File sshDir;
     private static GitCredentialRequest globalCredentialRequest;
 
     public static void setSshConfig(File sshDir, GitCredentialRequest request) {
         GitService.sshDir = sshDir;
         GitService.globalCredentialRequest = request;
-        // Set the SSH session factory if needed – depends on your SshKeyManager
     }
-
-    // ------------------------------------------------------------------
-    // Repository helpers
-    // ------------------------------------------------------------------
 
     public static boolean isRepository(File dir) {
         if (dir == null) return false;
@@ -94,10 +83,6 @@ public class GitService {
         if (name.isEmpty()) name = "repo";
         return new File(baseDir, name);
     }
-
-    // ------------------------------------------------------------------
-    // Open repository
-    // ------------------------------------------------------------------
 
     private static Repository open(File dir) throws GitServiceException {
         try {
@@ -158,7 +143,7 @@ public class GitService {
             for (String path : status.getUntracked()) {
                 GitFileStatus fs = new GitFileStatus();
                 fs.path = path;
-                fs.indexStatus =" ";
+                fs.indexStatus = " ";
                 fs.worktreeStatus = "?";
                 fs.untracked = true;
                 fs.conflicted = false;
@@ -180,7 +165,7 @@ public class GitService {
     }
 
     // ------------------------------------------------------------------
-    // Stage / unstage
+    // Stage / Unstage
     // ------------------------------------------------------------------
 
     public static void stage(File dir, List<String> paths, boolean all) throws GitServiceException {
@@ -200,7 +185,7 @@ public class GitService {
     public static void unstage(File dir, List<String> paths, boolean all) throws GitServiceException {
         try (Repository repo = open(dir); Git git = new Git(repo)) {
             if (all) {
-                git.reset().call();
+                git.reset().call(); // unstages everything (default MIXED)
             } else if (paths != null && !paths.isEmpty()) {
                 for (String p : paths) git.reset().addPath(p).call();
             } else {
@@ -231,7 +216,7 @@ public class GitService {
     }
 
     // ------------------------------------------------------------------
-    // Push
+    // Push, Pull, Fetch
     // ------------------------------------------------------------------
 
     public static void push(File dir, String remote, String branch,
@@ -251,10 +236,6 @@ public class GitService {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Pull
-    // ------------------------------------------------------------------
-
     public static void pull(File dir, String remote, String branch,
                             boolean rebase, GitCredentialRequest request, GitProgress progress) throws GitServiceException {
         try (Repository repo = open(dir); Git git = new Git(repo)) {
@@ -273,10 +254,6 @@ public class GitService {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Fetch
-    // ------------------------------------------------------------------
-
     public static void fetch(File dir, String remote,
                              GitCredentialRequest request, GitProgress progress) throws GitServiceException {
         try (Repository repo = open(dir); Git git = new Git(repo)) {
@@ -291,7 +268,7 @@ public class GitService {
     }
 
     // ------------------------------------------------------------------
-    // Clone
+    // Clone / Init
     // ------------------------------------------------------------------
 
     public static GitRepoInfo clone(String url, File destDir, boolean recursive,
@@ -310,10 +287,6 @@ public class GitService {
             throw GitServiceException.wrap("Failed to clone " + url, e);
         }
     }
-
-    // ------------------------------------------------------------------
-    // Init
-    // ------------------------------------------------------------------
 
     public static void init(File dir) throws GitServiceException {
         try {
@@ -342,7 +315,6 @@ public class GitService {
                 info.remoteName = info.remote ? ref.getName().replaceFirst("^refs/remotes/", "") : null;
                 result.add(info);
             }
-            // sort local first, then remote
             result.sort((a, b) -> {
                 if (a.remote != b.remote) return Boolean.compare(a.remote, b.remote);
                 return a.name.compareToIgnoreCase(b.name);
@@ -417,7 +389,6 @@ public class GitService {
             if (path != null && !path.isEmpty()) {
                 cmd.setPathFilter(PathFilter.create(path));
             }
-            // JGit diff command doesn't have setDetectRenames directly; use DiffFormatter separately
             List<DiffEntry> entries = cmd.call();
             return formatDiffEntries(repo, entries);
         } catch (GitAPIException | IOException e) {
@@ -439,24 +410,15 @@ public class GitService {
                 diffFormatter.setDetectRenames(true);
                 if (parent == null) {
                     // Compare with empty tree
-                    try {
-                        ObjectId emptyTreeId = repo.resolve(EMPTY_TREE_ID);
-                        if (emptyTreeId != null) {
-                            try (RevWalk emptyWalk = new RevWalk(repo)) {
-                                entries = diffFormatter.scan(emptyWalk.parseTree(emptyTreeId), commitObj.getTree());
-                            }
-                        } else {
-                            // Fallback using EmptyTreeIterator and CanonicalTreeParser
-                            CanonicalTreeParser commitTreeParser = new CanonicalTreeParser();
-                            commitTreeParser.reset(repo.newObjectReader(), commitObj.getTree());
-                            entries = diffFormatter.scan(new EmptyTreeIterator(), commitTreeParser);
+                    ObjectId emptyTreeId = repo.resolve(EMPTY_TREE_ID);
+                    if (emptyTreeId != null) {
+                        try (RevWalk emptyWalk = new RevWalk(repo)) {
+                            entries = diffFormatter.scan(emptyWalk.parseTree(emptyTreeId), commitObj.getTree());
                         }
-                    } catch (Exception e) {
-                        // Final fallback: scan with TreeWalk
+                    } else {
                         CanonicalTreeParser commitTreeParser = new CanonicalTreeParser();
                         commitTreeParser.reset(repo.newObjectReader(), commitObj.getTree());
                         entries = diffFormatter.scan(new EmptyTreeIterator(), commitTreeParser);
-                        }
                     }
                 } else {
                     entries = diffFormatter.scan(parent.getTree(), commitObj.getTree());
@@ -630,30 +592,22 @@ public class GitService {
 
     private static ProgressMonitor wrapProgress(GitProgress progress) {
         return new ProgressMonitor() {
-            @Override
-            public void start(int totalTasks) { /* optional */ }
-            @Override
-            public void beginTask(String title, int totalWork) {
+            @Override public void start(int totalTasks) {}
+            @Override public void beginTask(String title, int totalWork) {
                 if (progress != null) progress.onProgress(title, 0, totalWork);
             }
-            @Override
-            public void update(int completed) { /* optional */ }
-            @Override
-            public void endTask() { /* optional */ }
-            @Override
-            public boolean isCancelled() { return false; }
-            @Override
-            public void showDuration(boolean show) { /* ignore */ }
+            @Override public void update(int completed) {}
+            @Override public void endTask() {}
+            @Override public boolean isCancelled() { return false; }
+            @Override public void showDuration(boolean show) {}
         };
     }
 
     private static CredentialsProvider wrapCredentials(GitCredentialRequest request) {
         if (request == null) return null;
         return new CredentialsProvider() {
-            @Override
-            public boolean isInteractive() { return false; }
-            @Override
-            public boolean supports(CredentialItem... items) {
+            @Override public boolean isInteractive() { return false; }
+            @Override public boolean supports(CredentialItem... items) {
                 for (CredentialItem item : items) {
                     if (item instanceof CredentialItem.Username ||
                         item instanceof CredentialItem.Password) {
@@ -663,8 +617,7 @@ public class GitService {
                 }
                 return true;
             }
-            @Override
-            public boolean get(URIish uri, CredentialItem... items) throws UnsupportedCredentialItem {
+            @Override public boolean get(URIish uri, CredentialItem... items) throws UnsupportedCredentialItem {
                 String url = uri.toString();
                 GitCredentials creds = request.requestCredentials(url);
                 if (creds == null) return false;
@@ -681,10 +634,6 @@ public class GitService {
             }
         };
     }
-
-    // ------------------------------------------------------------------
-    // Helper: count lines
-    // ------------------------------------------------------------------
 
     private static int countLines(String text, char prefix) {
         if (text == null) return 0;
