@@ -282,7 +282,7 @@ class SwipeHistoryNavigationLayout : FrameLayout {
         }
 
         if (needsInvalidate) {
-            ViewCompat.postInvalidateOnAnimation(this);
+           postInvalidateOnAnimation();
         }
 
         return super.onTouchEvent(ev)
@@ -414,7 +414,7 @@ class SwipeHistoryNavigationLayout : FrameLayout {
         }
         if (needsInvalidate) {
             // Keep animating
-            ViewCompat.postInvalidateOnAnimation(this);
+            postInvalidateOnAnimation();
         }
     }
 
