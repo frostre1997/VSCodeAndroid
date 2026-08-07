@@ -1,5 +1,6 @@
 package co.median.android.git;
 
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.DiffCommand;
@@ -214,8 +215,14 @@ public final class GitService {
             if (head == null || up == null) return new int[]{0, 0};
 
             try {
-                 long behind = Git.wrap(repo).log().addRange(head, up).call().asList().size();
-                 long ahead = Git.wrap(repo).log().addRange(up, head).call().asList().size();
+                 long behind = 0;
+                 for (RevCommit c : Git.wrap(repo).log().addRange(head, up).call()) {
+                     behind++;
+                 }
+                 long ahead = 0;
+                 for (RevCommit c : Git.wrap(repo).log().addRange(up, head).call()) {
+                     ahead++;
+                 }
                 return new int[]{(int) ahead, (int) behind};
             } catch (GitAPIException e) {
                 return new int[]{0, 0};
@@ -519,12 +526,24 @@ public final class GitService {
                     diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
                     diffFormatter.setDetectRenames(true);
                     if (parent == null) {
-                        entries = diffFormatter.scan(new ObjectId[]{commitObj});
+                        // Compare against an empty tree – all files are additions
+                        try (RevWalk emptyWalk = new RevWalk(repo)) {
+                            ObjectId emptyTreeId = repo.resolve("4b825dc642cb6eb9a060e54bf8d69288fbee4904"); // git empty tree
+                            if (emptyTreeId == null) {
+                                // fallback: use EmptyTreeIterator with CanonicalTreeParser
+                                entries = diffFormatter.scan(
+                                    new org.eclipse.jgit.treewalk.EmptyTreeIterator(),
+                                    new org.eclipse.jgit.treewalk.CanonicalTreeParser(null, repo.newObjectReader(),
+                                );
+                            } else {
+                                RevTree emptyTree = emptyWalk.parseTree(emptyTreeId);
+                                entries = diffFormatter.scan(parent.getTree(), commitObj.getTree());
+                            }
+                        }
                     } else {
                         entries = diffFormatter.scan(parent.getTree(), commitObj.getTree());
                     }
-                }
-
+                    
                 List<GitDiffFile> result = new ArrayList<>();
                 for (DiffEntry entry : entries) {
                     GitDiffFile df = new GitDiffFile();
