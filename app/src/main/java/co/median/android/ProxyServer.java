@@ -14,7 +14,7 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 
-public class LocalProxyServer extends NanoHTTPD {
+public class ProxyServer extends NanoHTTPD {
     private static final String TAG = "LocalProxy";
     private static final String TARGET_HOST = "https://vscode.dev";
 
