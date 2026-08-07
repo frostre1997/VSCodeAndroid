@@ -10,11 +10,14 @@ import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.RemoteListCommand;
+import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.Status;
+import org.eclipse.jgit.api.DiffCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.errors.UnsupportedCredentialItem;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -25,11 +28,15 @@ import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.CredentialItem;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.SshSessionFactory;
+import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.EmptyTreeIterator;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 
@@ -113,22 +120,58 @@ public class GitService {
             Status status = git.status().call();
             List<GitFileStatus> result = new ArrayList<>();
             for (String path : status.getModified()) {
-                result.add(new GitFileStatus(path, 'M', ' ', false, false));
+                GitFileStatus fs = new GitFileStatus();
+                fs.path = path;
+                fs.indexStatus = 'M';
+                fs.worktreeStatus = ' ';
+                fs.untracked = false;
+                fs.conflicted = false;
+                result.add(fs);
             }
             for (String path : status.getAdded()) {
-                result.add(new GitFileStatus(path, 'A', ' ', false, false));
+                GitFileStatus fs = new GitFileStatus();
+                fs.path = path;
+                fs.indexStatus = 'A';
+                fs.worktreeStatus = ' ';
+                fs.untracked = false;
+                fs.conflicted = false;
+                result.add(fs);
             }
             for (String path : status.getRemoved()) {
-                result.add(new GitFileStatus(path, 'D', ' ', false, false));
+                GitFileStatus fs = new GitFileStatus();
+                fs.path = path;
+                fs.indexStatus = 'D';
+                fs.worktreeStatus = ' ';
+                fs.untracked = false;
+                fs.conflicted = false;
+                result.add(fs);
             }
             for (String path : status.getChanged()) {
-                result.add(new GitFileStatus(path, 'C', ' ', false, false));
+                GitFileStatus fs = new GitFileStatus();
+                fs.path = path;
+                fs.indexStatus = 'C';
+                fs.worktreeStatus = ' ';
+                fs.untracked = false;
+                fs.conflicted = false;
+                result.add(fs);
             }
             for (String path : status.getUntracked()) {
-                result.add(new GitFileStatus(path, ' ', '?', true, false));
+                GitFileStatus fs = new GitFileStatus();
+                fs.path = path;
+                fs.indexStatus = ' ';
+                fs.worktreeStatus = '?';
+                fs.untracked = true;
+                fs.conflicted = false;
+                result.add(fs);
             }
             for (String path : status.getConflicting()) {
-                result.add(new GitFileStatus(path, ' ', ' ', false, true));
+                GitFileStatus fs = new GitFileStatus();
+                fs.path = path;
+                fs.indexStatus = ' ';
+                fs.worktreeStatus = ' ';
+                fs.untracked = false;
+                fs.conflicted = true;
+                result.add(fs);
             }
             return result;
         } catch (GitAPIException | IOException e) {
@@ -157,7 +200,7 @@ public class GitService {
     public static void unstage(File dir, List<String> paths, boolean all) throws GitServiceException {
         try (Repository repo = open(dir); Git git = new Git(repo)) {
             if (all) {
-                git.reset().setMode(org.eclipse.jgit.api.ResetCommand.ResetType.HEAD).call();
+                git.reset().setMode(ResetCommand.ResetType.HEAD).call();
             } else if (paths != null && !paths.isEmpty()) {
                 for (String p : paths) git.reset().addPath(p).call();
             } else {
@@ -370,11 +413,11 @@ public class GitService {
         try (Repository repo = open(dir); Git git = new Git(repo)) {
             DiffCommand cmd = git.diff()
                     .setShowNameAndStatusOnly(false)
-                    .setCached(staged)
-                    .setDetectRenames(true);
+                    .setCached(staged);
             if (path != null && !path.isEmpty()) {
                 cmd.setPathFilter(PathFilter.create(path));
             }
+            // JGit diff command doesn't have setDetectRenames directly; use DiffFormatter separately
             List<DiffEntry> entries = cmd.call();
             return formatDiffEntries(repo, entries);
         } catch (GitAPIException | IOException e) {
@@ -396,17 +439,24 @@ public class GitService {
                 diffFormatter.setDetectRenames(true);
                 if (parent == null) {
                     // Compare with empty tree
-                    ObjectId emptyTreeId = repo.resolve(EMPTY_TREE_ID);
-                    if (emptyTreeId == null) {
-                        // Fallback: use TreeWalk with empty tree
+                    try {
+                        ObjectId emptyTreeId = repo.resolve(EMPTY_TREE_ID);
+                        if (emptyTreeId != null) {
+                            try (RevWalk emptyWalk = new RevWalk(repo)) {
+                                entries = diffFormatter.scan(emptyWalk.parseTree(emptyTreeId), commitObj.getTree());
+                            }
+                        } else {
+                            // Fallback using EmptyTreeIterator and CanonicalTreeParser
+                            CanonicalTreeParser commitTreeParser = new CanonicalTreeParser();
+                            commitTreeParser.reset(repo.newObjectReader(), commitObj.getTree());
+                            entries = diffFormatter.scan(new EmptyTreeIterator(), commitTreeParser);
+                        }
+                    } catch (Exception e) {
+                        // Final fallback: scan with TreeWalk
                         try (TreeWalk tw = new TreeWalk(repo)) {
-                            tw.addTree(new org.eclipse.jgit.treewalk.EmptyTreeIterator());
+                            tw.addTree(new EmptyTreeIterator());
                             tw.addTree(commitObj.getTree());
                             entries = diffFormatter.scan(tw);
-                        }
-                    } else {
-                        try (RevWalk emptyWalk = new RevWalk(repo)) {
-                            entries = diffFormatter.scan(emptyWalk.parseTree(emptyTreeId), commitObj.getTree());
                         }
                     }
                 } else {
@@ -494,7 +544,6 @@ public class GitService {
         try (Repository repo = open(dir)) {
             String branch = repo.getBranch();
             if (branch == null || branch.equals("HEAD")) {
-                // detached HEAD – cannot compute ahead/behind
                 return new int[]{0, 0};
             }
             String upstream = repo.getConfig().getString(
@@ -589,13 +638,13 @@ public class GitService {
                 if (progress != null) progress.onProgress(title, 0, totalWork);
             }
             @Override
-            public void update(int completed) {
-                // not used
-            }
+            public void update(int completed) { /* optional */ }
             @Override
             public void endTask() { /* optional */ }
             @Override
             public boolean isCancelled() { return false; }
+            @Override
+            public void showDuration(boolean show) { /* ignore */ }
         };
     }
 
@@ -605,19 +654,30 @@ public class GitService {
             @Override
             public boolean isInteractive() { return false; }
             @Override
-            public boolean supports(String... credentialTypes) {
-                for (String ct : credentialTypes) {
-                    if (ct.startsWith("UsernamePasswordCredential")) return true;
+            public boolean supports(CredentialItem... items) {
+                for (CredentialItem item : items) {
+                    if (item instanceof CredentialItem.Username ||
+                        item instanceof CredentialItem.Password) {
+                        continue;
+                    }
+                    return false;
                 }
-                return false;
+                return true;
             }
             @Override
-            public boolean get(URIish uri, Map<String, String> map) throws org.eclipse.jgit.errors.UnsupportedCredentialItem {
+            public boolean get(URIish uri, CredentialItem... items) throws UnsupportedCredentialItem {
                 String url = uri.toString();
                 GitCredentials creds = request.requestCredentials(url);
                 if (creds == null) return false;
-                map.put("Username", creds.username);
-                map.put("Password", creds.password);
+                for (CredentialItem item : items) {
+                    if (item instanceof CredentialItem.Username) {
+                        ((CredentialItem.Username) item).setValue(creds.username);
+                    } else if (item instanceof CredentialItem.Password) {
+                        ((CredentialItem.Password) item).setValue(creds.password.toCharArray());
+                    } else {
+                        throw new UnsupportedCredentialItem(uri, item.getClass().getName() + " not supported");
+                    }
+                }
                 return true;
             }
         };
