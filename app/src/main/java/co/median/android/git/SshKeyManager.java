@@ -56,7 +56,7 @@ public class SshKeyManager {
         File publicKey = new File(sshDir, name + ".pub");
 
         try (FileOutputStream out = new FileOutputStream(privateKey)) {
-            out.write(pemEncode("PRIVATE KEY", pair.getPrivate().getEncoded()));
+            out.write(pemEncode("PRIVATE KEY", pair.getPrivate().getEncoded()).getBytes());
         }
         privateKey.setReadable(false, false);
         privateKey.setReadable(true, true);
