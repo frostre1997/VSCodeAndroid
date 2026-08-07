@@ -505,56 +505,53 @@ public final class GitService {
     /**
      * Show the diff introduced by a single commit (commit vs its first parent).
      */
-    public static List<GitDiffFile> show(File dir, String commitId) throws GitServiceException {
-        try (Repository repo = open(dir);
-             org.eclipse.jgit.lib.ObjectReader reader = repo.newObjectReader();
-             org.eclipse.jgit.revwalk.RevWalk rw = new org.eclipse.jgit.revwalk.RevWalk(reader)) {
-            RevCommit commit = rw.parseCommit(repo.resolve(commitId));
-            RevCommit parent = commit.getParentCount() > 0
-                    ? rw.parseCommit(commit.getParent(0).getId()) : null;
+    public static List<GitDiffFile> show(File repoDir, String commit) throws GitServiceException {
+        try (Repository repo = open(repoDir)) {
+            ObjectId id = repo.resolve(commit);
+            if (id == null) throw new GitServiceException("Invalid commit: " + commit);
+            try (RevWalk walk = new RevWalk(repo)) {
+                RevCommit commitObj = walk.parseCommit(id);
+                RevCommit parent = commitObj.getParentCount() > 0 ? walk.parseCommit(commitObj.getParent(0)) : null;
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            DiffFormatter formatter = new DiffFormatter(out);
-            formatter.setRepository(repo);
-            formatter.setDiffComparator(RawTextComparator.DEFAULT);
-            formatter.setContext(3);
-
-            org.eclipse.jgit.treewalk.CanonicalTreeParser newParser = new org.eclipse.jgit.treewalk.CanonicalTreeParser();
-            newParser.reset(reader, commit.getTree());
-            List<DiffEntry> entries;
-            if (parent == null) {
-                entries = formatter.scan(new org.eclipse.jgit.treewalk.EmptyTreeIterator(), newParser);
-            } else {
-                org.eclipse.jgit.treewalk.CanonicalTreeParser oldParser = new org.eclipse.jgit.treewalk.CanonicalTreeParser();
-                oldParser.reset(reader, parent.getTree());
-                entries = formatter.scan(oldParser, newParser);
-            }
-
-            List<GitDiffFile> result = new ArrayList<>();
-            for (DiffEntry entry : entries) {
-                GitDiffFile df = new GitDiffFile();
-                df.path = entry.getNewPath();
-                df.oldPath = entry.getOldPath();
-                df.changeType = entry.getChangeType().name();
-                
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                DiffFormatter formatter = new DiffFormatter(baos)) {
-                String text;
-                try {
-                    formatter.setRepository(repo);
-                    formatter.format(entry);
-                    text = baos.toString(StandardCharsets.UTF_8.name());
-                } finally {
-                    formeatter.close();
+                List<DiffEntry> entries;
+                try (DiffFormatter diffFormatter = new DiffFormatter(new ByteArrayOutputStream())) {
+                    diffFormatter.setRepository(repo);
+                    diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+                    diffFormatter.setDetectRenames(true);
+                    if (parent == null) {
+                        entries = diffFormatter.scan(new ObjectId[]{commitObj});
+                    } else {
+                        entries = diffFormatter.scan(parent.getTree(), commitObj.getTree());
+                    }
                 }
-                df.diff = text;
-                df.additions = countLines(text, '+');
-                df.deletions = countLines(text, '-');
-                result.add(df);
+
+                List<GitDiffFile> result = new ArrayList<>();
+                for (DiffEntry entry : entries) {
+                    GitDiffFile df = new GitDiffFile();
+                    df.path = entry.getNewPath();
+                    df.oldPath = entry.getOldPath();
+                    df.changeType = entry.getChangeType().name();
+
+                    // Generate diff text for this entry using a fresh DiffFormatter
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    DiffFormatter formatter = new DiffFormatter(baos);
+                    try {
+                        formatter.setRepository(repo);
+                        formatter.setDiffComparator(RawTextComparator.DEFAULT);
+                        formatter.setDetectRenames(true);
+                        formatter.format(entry);
+                        String text = baos.toString(StandardCharsets.UTF_8.name());
+                        df.diff = text;
+                        df.additions = countLines(text, '+');
+                        df.deletions = countLines(text, '-');
+                    } finally {
+                        formatter.close();
+                    }
+                    result.add(df);
+                }
+                return result;
             }
-            formatter.close();
-            return result;
-        } catch (IOException e) {
+        } catch (IOException | GitAPIException e) {
             throw GitServiceException.wrap("Failed to show commit", e);
         }
     }
