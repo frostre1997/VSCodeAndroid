@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-07 (marketplace)
+
+- **Open VSX marketplace in WebView** — the actual marketplace used by `vscode.dev` (`open-vsx.org` and its extension-file CDN `*.blob.core.windows.net`) is now whitelisted as an internal domain, so the extension gallery, extension details and installs load inside the WebView instead of being kicked out to a Custom Tab.
+- **GitHub auth in-app** — `github.com`, `*.githubusercontent.com` and `*.githubapp.com` load internally so marketplace publisher verification and GitHub sign-in complete without leaving the app.
+- **Microsoft login broadened** — `login.live.com` and `login.microsoft.com` added alongside `login.microsoftonline.com`.
+- **Service workers enabled** — `ServiceWorkerControllerCompat` is now configured (cache mode + content access), which the web-worker extension host and marketplace rely on.
+
 ## 2026-08-05 (settings)
 
 - **UA spoof** — Android now reports a desktop Chrome user agent so `vscode.dev` serves the full desktop client.

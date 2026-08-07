@@ -13,6 +13,22 @@ An open-source Android client for [vscode.dev](https://vscode.dev/) — a fully 
 - **Run Code**: Execute code on your device, with support for Python, JavaScript, and more.
 - **Full VS Code functionality**: Almost all VS Code features are available.
 
+## Feature status
+
+| Feature | Status |
+| --- | --- |
+| Code editing (JS, Python, HTML, CSS, …) | ✅ Fully working |
+| Syntax highlighting | ✅ Fully working |
+| Themes (dark/light) | ✅ Fully working |
+| File explorer | ✅ Fully working |
+| Search & Replace | ✅ Fully working |
+| Extensions (themes, linters, formatters) | ✅ Working (Open VSX marketplace now loads in the WebView) |
+| Git (add, commit, push, pull) | 🔧 Only for remote repos (GitHub integration); local Git would need a JGit bridge |
+| Marketplace | ✅ Open VSX (`open-vsx.org`) and its CDN load in-app; GitHub auth for publisher verification completes in-app |
+| Terminal | ❌ Impossible — needs a server-side backend |
+| Python / C++ / Java language servers | ❌ Impossible — needs Node/WASM language server backends |
+| Remote / Codespaces | ⚠️ Partially — GitHub auth works, Codespaces depends on the remote service |
+
 ## The redesign
 
 - **New identity** — an original blue-to-navy "code chevron" icon, matching splash screen and offline page.

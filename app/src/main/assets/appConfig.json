@@ -105,7 +105,7 @@
           "mode": "internal",
           "label": "Microsoft Login",
           "pagesToTrigger": "custom",
-          "regex": "https?://login\\.microsoftonline\\.com.*"
+          "regex": "https?:\\/\\/([-\\w]+\\.)*(login\\.microsoftonline\\.com|login\\.live\\.com|login\\.microsoft\\.com)(\\/.*)?$"
         },
         {
           "mode": "internal",
@@ -123,7 +123,19 @@
           "mode": "internal",
           "label": "Open VSX Marketplace",
           "pagesToTrigger": "custom",
-          "regex": "https?:\\/\\/([-\\w]+\\.)*(open-vsx\\.org)(\\/.*)?$"
+          "regex": "https?:\\/\\/([-\\w]+\\.)*open-vsx\\.org(\\/.*)?$"
+        },
+        {
+          "mode": "internal",
+          "label": "Extension downloads",
+          "pagesToTrigger": "custom",
+          "regex": "https?:\\/\\/([-\\w]+\\.)*blob\\.core\\.windows\\.net(\\/.*)?$"
+        },
+        {
+          "mode": "internal",
+          "label": "GitHub Auth",
+          "pagesToTrigger": "custom",
+          "regex": "https?:\\/\\/([-\\w]+\\.)*(github\\.com|githubusercontent\\.com|githubapp\\.com)(\\/.*)?$"
         },
         {
           "mode": "appbrowser",
@@ -384,4 +396,4 @@
       "allowInsecure": null
     }
   }
-    }
+}

@@ -11,6 +11,11 @@ import android.webkit.WebView;
 
 import java.util.Map;
 
+import androidx.webkit.ServiceWorkerClientCompat;
+import androidx.webkit.ServiceWorkerControllerCompat;
+import androidx.webkit.WebResourceRequestCompat;
+import androidx.webkit.WebResourceResponseCompat;
+
 import co.median.median_core.AppConfig;
 import co.median.median_core.GNLog;
 import co.median.median_core.GoNativeWebviewInterface;
@@ -108,6 +113,18 @@ public class WebViewSetup {
         webSettings.setCacheMode(appConfig.cacheMode.webSettingsCacheMode());
 
         webSettings.setDatabaseEnabled(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            ServiceWorkerControllerCompat controller = ServiceWorkerControllerCompat.getInstance();
+            controller.setServiceWorkerClient(new ServiceWorkerClientCompat() {
+                @Override
+                public WebResourceResponseCompat shouldInterceptRequest(WebResourceRequestCompat request) {
+                    return null;
+                }
+            });
+            controller.getServiceWorkerWebSettings().setCacheMode(appConfig.cacheMode.webSettingsCacheMode());
+            controller.getServiceWorkerWebSettings().setAllowContentAccess(true);
+        }
 
         webSettings.setSaveFormData(false);
         webSettings.setSavePassword(false);
