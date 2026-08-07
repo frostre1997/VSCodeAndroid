@@ -14,7 +14,7 @@ a:focus, button:focus, input:focus, textarea:focus {
   }
 }
 
-/* --- Restore the top bar so the VS Code logo icon (top left) shows --- */
+/* --- Show the title bar (restore the VS Code logo) --- */
 .monaco-workbench .part.titlebar {
     display: flex !important;
 }
@@ -24,8 +24,14 @@ a:focus, button:focus, input:focus, textarea:focus {
     display: none !important;
 }
 
-/* --- Remove the "Visual Studio Code (Preview)" command-center pill --- */
+/* --- Show the command center (logo) and hide only the "Preview" text --- */
 .monaco-workbench .part.titlebar .command-center {
+    display: flex !important;
+}
+
+/* Hide the "Visual Studio Code (Preview)" text but keep the icon */
+.monaco-workbench .part.titlebar .command-center .command-center-label,
+.monaco-workbench .part.titlebar .command-center span:not(.codicon) {
     display: none !important;
 }
 
@@ -73,7 +79,7 @@ body {
     border-radius: 4px !important;
 }
 
-/* --- Fix Zen mode: keep menubar hidden & editor below the title bar --- */
+/* --- Fix Zen mode: keep menubar hidden & editor below title bar --- */
 .zen-mode .part.menubar {
     display: none !important;
 }
@@ -82,7 +88,7 @@ body {
     height: calc(100% - 35px) !important;
 }
 
-/* --- Style scrollbars to match dark theme (optional) --- */
+/* --- Style scrollbars to match dark theme --- */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
