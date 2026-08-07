@@ -5,9 +5,9 @@ apply plugin: 'kotlin-android'
 //[enabled by builder] apply plugin: 'com.google.gms.google-services'
 //[enabled by builder] apply plugin: 'com.google.firebase.crashlytics'
 
-// ============================================================
-// EXPLICIT REPOSITORIES – ensures NanoHTTPD is downloaded
-// ============================================================
+// =====================================================================
+// EXPLICIT REPOSITORIES – ensures NanoHTTPD is downloaded (if needed)
+// =====================================================================
 repositories {
     google()
     mavenCentral()
@@ -166,6 +166,13 @@ android {
 
     viewBinding {
         enabled = true
+    }
+
+    // ============================================================
+    // FIX: Duplicate OSGI-INF/l10n/plugin.properties from JGit JARs
+    // ============================================================
+    packagingOptions {
+        pickFirsts.add("OSGI-INF/l10n/plugin.properties")
     }
 }
 
