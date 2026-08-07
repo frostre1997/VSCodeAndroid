@@ -193,11 +193,7 @@ dependencies {
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'com.google.android.gms:play-services-location:21.3.0'
-
-    // NanoHTTPD proxy server (for CDN bypass)
-    implementation 'org.nanohttpd:nanohttpd:2.3.1'
-	
-    /**** end google ****/
+	 /**** end google ****/
 
     /**** local dependencies ****/
     implementation fileTree(dir: 'libs', include: '*.jar')
