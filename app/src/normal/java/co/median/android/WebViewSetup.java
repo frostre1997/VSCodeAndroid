@@ -118,7 +118,8 @@ public class WebViewSetup {
             ServiceWorkerControllerCompat controller = ServiceWorkerControllerCompat.getInstance();
             controller.setServiceWorkerClient(new ServiceWorkerClientCompat() {
                 @Override
-                public WebResourceResponseCompat shouldInterceptRequest(WebResourceRequestCompat request) {
+                public WebResourceResponse shouldInterceptRequest(WebResourceRequest request) {
+                    // your interception logic here
                     return null;
                 }
             });
