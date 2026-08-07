@@ -303,15 +303,13 @@ public class MainActivity extends AppCompatActivity implements Observer,
 
         // ----- LOCAL PROXY SERVER TO BYPASS CDN BLOCK -----
         ProxyServer server = new ProxyServer();
-        try {
-            server.start();
-            Log.d("Proxy", "Proxy server started on port 8080");
-        } catch (Exception e) {
-            Log.e("Proxy", "Failed to start proxy: " + e.getMessage());
-            // Fallback: if proxy fails, try direct load (but likely blocked)
-            mWebview.loadUrl("https://vscode.dev");
-            return;
-        }
+        server.start();
+
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (mWebview != null) {
+                mWebview.loadUrl("http://localhost:8080/");
+            }
+        }, 300);
 
         // Wait a moment for the server to fully initialize, then load the proxy URL
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
