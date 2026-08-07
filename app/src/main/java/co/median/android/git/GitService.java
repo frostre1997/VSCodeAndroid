@@ -214,8 +214,8 @@ public final class GitService {
             if (head == null || up == null) return new int[]{0, 0};
 
             try {
-                long behind = Git.wrap(repo).log().addRange(head, up).call().size();
-                long ahead = Git.wrap(repo).log().addRange(up, head).call().size();
+                 long behind = Git.wrap(repo).log().addRange(head, up).call().asList().size();
+                 long ahead = Git.wrap(repo).log().addRange(up, head).call().asList().size();
                 return new int[]{(int) ahead, (int) behind};
             } catch (GitAPIException e) {
                 return new int[]{0, 0};
@@ -538,13 +538,15 @@ public final class GitService {
                 df.changeType = entry.getChangeType().name();
                 
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                DiffFormatter formatter = new DiffFormatter(baos)) {
                 String text;
-                try (DiffFormatter formatter = new DiffFormatter(baos)) {
+                try {
                     formatter.setRepository(repo);
                     formatter.format(entry);
-                    String text = baos.toString(StandardCharsets.UTF_8.name());
-                } // ... continue using `text` ...
-
+                    text = baos.toString(StandardCharsets.UTF_8.name());
+                } finally {
+                    formeatter.close();
+                }
                 df.diff = text;
                 df.additions = countLines(text, '+');
                 df.deletions = countLines(text, '-');
