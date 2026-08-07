@@ -302,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements Observer,
         }
 
         // ----- LOCAL PROXY SERVER TO BYPASS CDN BLOCK -----
-        LocalProxyServer server = new LocalProxyServer();
+        ProxyServer server = new ProxyServer();
         try {
             server.start();
             Log.d("Proxy", "Proxy server started on port 8080");
