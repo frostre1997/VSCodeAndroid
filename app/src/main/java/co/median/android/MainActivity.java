@@ -60,6 +60,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -317,13 +318,13 @@ public class MainActivity extends AppCompatActivity implements Observer,
        String vscodeurl = "https://vscode.dev/?settings=workbench.startupEditor%3Dnone&workbench.welcomePage.enabled=false";
 
        CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
-       builder.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
-       builder.setShowTitle(true);
-       builder.setUrlBarHidingEnabled(true);
-       builder.addDefaultShareMenuItem();
+       customTabsBuilder.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
+       customTabsBuilder.setShowTitle(true);
+       customTabsBuilder.setUrlBarHidingEnabled(true)
+       customTabsBuilder.addDefaultShareMenuItem();
 
-       CustomTabsIntent customTabsIntent = builder.build();
-       customTabsIntent.launchUrl(this, Uri.parse(url));
+       CustomTabsIntent customTabsIntent = customTabsBuilder.build();
+       customTabsIntent.launchUrl(this, Uri.parse(vscodeUrl));
 
        // Optional: close the app after opening
        // finish();
