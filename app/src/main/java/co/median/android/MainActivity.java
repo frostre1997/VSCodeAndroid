@@ -315,7 +315,7 @@ public class MainActivity extends AppCompatActivity implements Observer,
        getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
 
        // ----- OPEN VS CODE IN CHROME CUSTOM TAB (RELIABLE, NO BLOCKING) -----
-       String vscodeurl = "https://vscode.dev/?settings=workbench.startupEditor%3Dnone&workbench.welcomePage.enabled=false";
+       String vscodeUrl = "https://vscode.dev/?settings=workbench.startupEditor%3Dnone&workbench.welcomePage.enabled=false";
 
        CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
        customTabsBuilder.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
