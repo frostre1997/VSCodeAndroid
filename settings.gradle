@@ -1,18 +1,3 @@
-rootProject.name = 'GoNative'
-System.setProperty("user.dir", rootProject.projectDir.toString())
-
-dependencyResolutionManagement {
-    // Fail project-level repositories to ensure all modules use these repositories.
-    repositoriesMode.set(org.gradle.api.initialization.dsl.RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-        maven { url 'https://maven.median.co' }
-        // local maven directory used by this project
-        maven { url "$rootDir/maven" }
-    }
-}
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -21,6 +6,18 @@ pluginManagement {
     }
 }
 
-apply from: file("./plugins.gradle"); applyModulesSettingsGradle(settings)
+rootProject.name = 'GoNative'
+System.setProperty("user.dir", rootProject.projectDir.toString())
 
+dependencyResolutionManagement {
+    repositoriesMode.set(org.gradle.api.initialization.dsl.RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://maven.median.co' }
+        maven { url "$rootDir/maven" }
+    }
+}
+
+apply from: file("./plugins.gradle"); applyModulesSettingsGradle(settings)
 include ':app'
