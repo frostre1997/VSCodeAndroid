@@ -320,7 +320,7 @@ public class MainActivity extends AppCompatActivity implements Observer,
        CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
        customTabsBuilder.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
        customTabsBuilder.setShowTitle(true);
-       customTabsBuilder.setUrlBarHidingEnabled(true)
+       customTabsBuilder.setUrlBarHidingEnabled(true);
        customTabsBuilder.addDefaultShareMenuItem();
 
        CustomTabsIntent customTabsIntent = customTabsBuilder.build();
