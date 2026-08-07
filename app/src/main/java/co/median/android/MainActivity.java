@@ -248,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements Observer,
     settings.setSaveFormData(true);
     settings.setSavePassword(false);
     settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+    settings.setCacheMode(WebSettings.LOAD_NO_CACHE); // Force fresh load
 
     // ----- Force desktop User‑Agent for Google button -----
     String desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
