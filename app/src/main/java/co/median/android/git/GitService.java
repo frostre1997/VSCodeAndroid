@@ -159,7 +159,7 @@ public class GitService {
                 result.add(fs);
             }
             return result;
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to get status", e);
         }
     }
@@ -177,7 +177,7 @@ public class GitService {
             } else {
                 throw new GitServiceException("No paths specified for stage");
             }
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to stage", e);
         }
     }
@@ -191,7 +191,7 @@ public class GitService {
             } else {
                 throw new GitServiceException("No paths specified for unstage");
             }
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to unstage", e);
         }
     }
@@ -210,7 +210,7 @@ public class GitService {
                 cmd.setAuthor(authorName, authorEmail);
             }
             cmd.call();
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to commit", e);
         }
     }
@@ -231,7 +231,7 @@ public class GitService {
             }
             if (force) cmd.setForce(true);
             cmd.call();
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to push", e);
         }
     }
@@ -249,7 +249,7 @@ public class GitService {
             if (!result.isSuccessful()) {
                 throw new GitServiceException("Pull failed: " + result.toString());
             }
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to pull", e);
         }
     }
@@ -262,7 +262,7 @@ public class GitService {
                     .setProgressMonitor(wrapProgress(progress));
             if (remote != null && !remote.isEmpty()) cmd.setRemote(remote);
             cmd.call();
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to fetch", e);
         }
     }
@@ -283,7 +283,7 @@ public class GitService {
             try (Git git = cmd.call()) {
                 return getRepoInfo(git.getRepository().getDirectory().getParentFile());
             }
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to clone " + url, e);
         }
     }
@@ -331,7 +331,7 @@ public class GitService {
             if (startPoint != null && !startPoint.isEmpty()) cmd.setStartPoint(startPoint);
             cmd.call();
             return findBranch(repo, Constants.R_HEADS + name);
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to create branch " + name, e);
         }
     }
@@ -346,7 +346,7 @@ public class GitService {
             }
             cmd.call();
             return findBranch(repo, Constants.R_HEADS + name);
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to checkout " + name, e);
         }
     }
@@ -354,7 +354,7 @@ public class GitService {
     public static void deleteBranch(File dir, String name, boolean force) throws GitServiceException {
         try (Repository repo = open(dir); Git git = new Git(repo)) {
             git.branchDelete().setBranchNames(name).setForce(force).call();
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to delete branch " + name, e);
         }
     }
@@ -362,7 +362,7 @@ public class GitService {
     public static void checkoutCommit(File dir, String commit) throws GitServiceException {
         try (Repository repo = open(dir); Git git = new Git(repo)) {
             git.checkout().setName(commit).call();
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to checkout commit " + commit, e);
         }
     }
@@ -391,7 +391,7 @@ public class GitService {
             }
             List<DiffEntry> entries = cmd.call();
             return formatDiffEntries(repo, entries);
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to diff", e);
         }
     }
@@ -425,7 +425,7 @@ public class GitService {
                 }
             }
             return formatDiffEntries(repo, entries);
-        } catch (IOException | GitAPIException e) {
+        } catch (IOException e) {
             throw GitServiceException.wrap("Failed to show commit", e);
         }
     }
@@ -476,7 +476,7 @@ public class GitService {
                 result.add(info);
             }
             return result;
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to get log", e);
         }
     }
@@ -492,7 +492,7 @@ public class GitService {
             List<String> result = new ArrayList<>();
             for (RemoteConfig rc : remotes) result.add(rc.getName());
             return result;
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to list remotes", e);
         }
     }
@@ -522,7 +522,7 @@ public class GitService {
             for (RevCommit c : Git.wrap(repo).log().addRange(head, up).call()) behind++;
             for (RevCommit c : Git.wrap(repo).log().addRange(up, head).call()) ahead++;
             return new int[]{(int) ahead, (int) behind};
-        } catch (IOException | GitAPIException e) {
+        } catch (IOException e) {
             throw GitServiceException.wrap("Failed to compute ahead/behind", e);
         }
     }
@@ -561,7 +561,7 @@ public class GitService {
             } else {
                 for (String p : paths) git.checkout().addPath(p).setForce(true).call();
             }
-        } catch (GitAPIException | IOException e) {
+        } catch (GitAPIException e) {
             throw GitServiceException.wrap("Failed to discard changes", e);
         }
     }
