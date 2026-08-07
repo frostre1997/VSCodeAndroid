@@ -103,6 +103,7 @@ class LocationServiceHelper(val activity: Activity) {
             val mode = Settings.Secure.getInt(
                 activity.contentResolver,
                 Settings.Secure.LOCATION_MODE,
+                @Suppress("DEPRECATION")
                 Settings.Secure.LOCATION_MODE_OFF
             )
             return (mode != Settings.Secure.LOCATION_MODE_OFF)
