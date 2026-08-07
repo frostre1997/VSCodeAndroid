@@ -325,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements Observer,
 
        CustomTabsIntent customTabsIntent = customTabsBuilder.build();
        customTabsIntent.launchUrl(this, Uri.parse(vscodeUrl));
-
+       
        // Optional: close the app after opening
        // finish();
 
