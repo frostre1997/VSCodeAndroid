@@ -6,6 +6,8 @@ import android.os.Build;
 import android.os.Message;
 import android.text.TextUtils;
 import android.webkit.CookieManager;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
@@ -13,8 +15,7 @@ import java.util.Map;
 
 import androidx.webkit.ServiceWorkerClientCompat;
 import androidx.webkit.ServiceWorkerControllerCompat;
-import androidx.webkit.WebResourceRequestCompat;
-import androidx.webkit.WebResourceResponseCompat;
+import androidx.webkit.WebViewFeature;
 
 import co.median.median_core.AppConfig;
 import co.median.median_core.GNLog;
