@@ -18,6 +18,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
+import android.graphics.Bitmap;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -47,6 +48,8 @@ import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebViewClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
@@ -234,6 +237,61 @@ public class MainActivity extends AppCompatActivity implements Observer,
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+    if (mWebview != null) {
+    WebView webView = (WebView) mWebview;
+
+    // ----- Enable JavaScript, DOM storage, and cookies -----
+    WebSettings settings = webView.getSettings();
+    settings.setJavaScriptEnabled(true);
+    settings.setDomStorageEnabled(true);
+    settings.setSaveFormData(true);
+    settings.setSavePassword(false);
+    settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+
+    // ----- Force desktop User‑Agent for Google button -----
+    String desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
+    settings.setUserAgentString(desktopUA);
+
+    // ----- Enable cookies (required for OAuth) -----
+    CookieManager cookieManager = CookieManager.getInstance();
+    cookieManager.setAcceptCookie(true);
+    cookieManager.setAcceptThirdPartyCookies(webView, true);
+
+    // ----- WebViewClient to handle OAuth redirects -----
+    webView.setWebViewClient(new WebViewClient() {
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            if (url.startsWith("https://github.com/") ||
+                url.startsWith("https://vscode.dev/") ||
+                url.startsWith("https://vscode-cdn.net/") ||
+                url.startsWith("https://vscode-resource.")) {
+                view.loadUrl(url);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            super.onPageStarted(view, url, favicon);
+            if (url.contains("code=") || url.contains("token=") || url.contains("state=")) {
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    view.loadUrl("https://vscode.dev/?settings=workbench.startupEditor%3Dnone&workbench.welcomePage.enabled=false&vscode-coi=off");
+                }, 500);
+            }
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            if (url.equals("about:blank") || url.contains("error")) {
+                view.loadUrl("https://vscode.dev/");
+            }
+        }
+    });
+    }
 
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
 
