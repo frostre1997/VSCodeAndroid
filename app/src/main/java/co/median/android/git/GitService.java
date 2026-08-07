@@ -200,7 +200,7 @@ public class GitService {
     public static void unstage(File dir, List<String> paths, boolean all) throws GitServiceException {
         try (Repository repo = open(dir); Git git = new Git(repo)) {
             if (all) {
-                git.reset().setMode(ResetCommand.ResetType.HEAD).call();
+                git.reset().call();
             } else if (paths != null && !paths.isEmpty()) {
                 for (String p : paths) git.reset().addPath(p).call();
             } else {
@@ -453,10 +453,9 @@ public class GitService {
                         }
                     } catch (Exception e) {
                         // Final fallback: scan with TreeWalk
-                        try (TreeWalk tw = new TreeWalk(repo)) {
-                            tw.addTree(new EmptyTreeIterator());
-                            tw.addTree(commitObj.getTree());
-                            entries = diffFormatter.scan(tw);
+                        CanonicalTreeParser commitTreeParser = new CanonicalTreeParser();
+                        commitTreeParser.reset(repo.newObjectReader(), commitObj.getTree());
+                        entries = diffFormatter.scan(new EmptyTreeIterator(), commitTreeParser);
                         }
                     }
                 } else {
