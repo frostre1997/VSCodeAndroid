@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-08-07 (title bar + VS Code logo)
+
+- **Brought back the VS Code logo (top left)** — the top title bar is visible again so the `window-appicon` logo icon renders at the top-left of the WebView (hidden while the whole title bar was `display:none`).
+- **Removed the "Visual Studio Code (Preview)" pill** — the command-center pill in the top bar (`part.titlebar .command-center`) is now hidden; the editor area starts below the restored 35px title bar.
+- The menu bar and desktop-only title bar controls (window buttons, layout actions) stay hidden on Android.
+
 ## 2026-08-07 (MainScreen focus + marketplace fix)
 
 - **Back to the MainScreen WebView** — the app no longer opens `vscode.dev` in a Chrome Custom Tab; it loads directly inside `MainActivity`'s WebView.

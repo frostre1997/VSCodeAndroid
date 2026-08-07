@@ -14,16 +14,27 @@ a:focus, button:focus, input:focus, textarea:focus {
   }
 }
 
-/* --- Hide top title bar and menu --- */
-.monaco-workbench .part.titlebar,
+/* --- Restore the top bar so the VS Code logo icon (top left) shows --- */
+.monaco-workbench .part.titlebar {
+    display: flex !important;
+}
+
+/* --- Keep the menu bar hidden (not needed on mobile) --- */
 .monaco-workbench .part.menubar {
     display: none !important;
 }
 
-/* --- Make the editor fill the full screen --- */
-.monaco-workbench .part.editor {
-    top: 0 !important;
-    height: 100% !important;
+/* --- Remove the "Visual Studio Code (Preview)" command-center pill --- */
+.monaco-workbench .part.titlebar .command-center {
+    display: none !important;
+}
+
+/* --- Hide desktop-only title bar controls (window buttons, layout actions) --- */
+.monaco-workbench .part.titlebar .window-controls-container,
+.monaco-workbench .part.titlebar .action-toolbar-container,
+.monaco-workbench .part.titlebar .update-toolbar-container,
+.monaco-workbench .part.titlebar .center-adjacent-toolbar-container {
+    display: none !important;
 }
 
 /* --- Remove the tiny white line (scrollbar track) on the right --- */
@@ -62,19 +73,13 @@ body {
     border-radius: 4px !important;
 }
 
-/* --- Fix Zen mode: keep menubar hidden & editor full --- */
+/* --- Fix Zen mode: keep menubar hidden & editor below the title bar --- */
 .zen-mode .part.menubar {
     display: none !important;
 }
 .zen-mode .part.editor {
-    top: 0 !important;
-    height: 100% !important;
-}
-
-/* --- Hide the "Visual Studio Code (Preview)" banner --- */
-.preview-banner,
-.status-bar .preview-banner {
-    display: none !important;
+    top: 35px !important;
+    height: calc(100% - 35px) !important;
 }
 
 /* --- Style scrollbars to match dark theme (optional) --- */
