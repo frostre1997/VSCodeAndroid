@@ -247,7 +247,6 @@ public class MainActivity extends AppCompatActivity implements Observer,
     settings.setDomStorageEnabled(true);
     settings.setSaveFormData(true);
     settings.setSavePassword(false);
-    settings.setCacheMode(WebSettings.LOAD_DEFAULT);
     settings.setCacheMode(WebSettings.LOAD_NO_CACHE); // Force fresh load
 
     // ----- Force desktop User‑Agent for Google button -----
@@ -287,13 +286,28 @@ public class MainActivity extends AppCompatActivity implements Observer,
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
+                
             if (url.equals("about:blank") || url.contains("error")) {
                 view.loadUrl("https://vscode.dev/");
             }
         }
-    });
-    }
 
+        // If we're on the GitHub login page, inject JS to force desktop layout
+        if (url.startsWith("https://github.com/login")) {
+            String script =
+                "document.querySelector('meta[name=viewport]').setAttribute('content', 'width=1024, initial-scale=1');" +
+                "document.body.style.minWidth = '1024px';" +
+                "document.body.style.overflowX = 'auto';" +
+                "document.querySelector('.auth-form-body') && document.querySelector('.auth-form-body').style.maxWidth = 'none';" +
+                "document.querySelector('.auth-form') && document.querySelector('.auth-form').style.maxWidth = '640px';" +
+                "document.querySelectorAll('.js-oauth-google-login').forEach(el => el.style.display = 'block');" +
+                "document.querySelector('.social-login') && document.querySelector('.social-login').style.display = 'block';" +
+                "document.querySelector('.social-login') && document.querySelector('.social-login').style.opacity = '1';";
+            view.evaluateJavascript(script, null);
+        }
+    }
+});
+            
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
 
         getWindow().getDecorView().setSystemUiVisibility(
