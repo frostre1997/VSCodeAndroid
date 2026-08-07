@@ -23,7 +23,7 @@ public class ProxyServer extends NanoHTTPD {
         CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
     }
 
-    public LocalProxyServer() {
+    public ProxyServer() {
         super(8080); // Port 8080 – change if needed
     }
 
