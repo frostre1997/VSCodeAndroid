@@ -1,5 +1,6 @@
 package co.median.android.git;
 
+import android.webkit.JavascriptInterface;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
