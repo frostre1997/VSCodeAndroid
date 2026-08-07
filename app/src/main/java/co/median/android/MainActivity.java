@@ -300,24 +300,6 @@ public class MainActivity extends AppCompatActivity implements Observer,
                 ((WebView) mWebview).setWebViewClient(new CustomWebViewClient());
             }
         }
-
-        // ----- LOCAL PROXY SERVER TO BYPASS CDN BLOCK -----
-        ProxyServer server = new ProxyServer();
-        server.start();
-
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (mWebview != null) {
-                mWebview.loadUrl("http://localhost:8080/");
-            }
-        }, 500);
-
-        // Wait a moment for the server to fully initialize, then load the proxy URL
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (mWebview != null) {
-                // Load VS Code via the local proxy
-                mWebview.loadUrl("http://localhost:8080/");
-            }
-        }, 300); // 300ms delay ensures the server is ready
             
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
 
@@ -330,6 +312,21 @@ public class MainActivity extends AppCompatActivity implements Observer,
             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
        );
        getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
+
+       // ----- OPEN VS CODE IN CHROME CUSTOM TAB (RELIABLE, NO BLOCKING) -----
+       String url = "https://vscode.dev/?settings=workbench.startupEditor%3Dnone&workbench.welcomePage.enabled=false";
+
+       CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+       builder.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
+       builder.setShowTitle(true);
+       builder.setUrlBarHidingEnabled(true);
+       builder.addDefaultShareMenuItem();
+
+       CustomTabsIntent customTabsIntent = builder.build();
+       customTabsIntent.launchUrl(this, Uri.parse(url));
+
+       // Optional: close the app after opening
+       // finish();
 
         final AppConfig appConfig = AppConfig.getInstance(this);
         GoNativeApplication application = (GoNativeApplication)getApplication();
