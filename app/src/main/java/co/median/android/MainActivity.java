@@ -309,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements Observer,
             if (mWebview != null) {
                 mWebview.loadUrl("http://localhost:8080/");
             }
-        }, 300);
+        }, 500);
 
         // Wait a moment for the server to fully initialize, then load the proxy URL
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
