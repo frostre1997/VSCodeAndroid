@@ -251,15 +251,28 @@ public class MainActivity extends AppCompatActivity implements Observer,
                 return super.shouldInterceptRequest(view, request);
             }
 
+            // Never re-fetch non-GET requests. The Open VSX gallery API used by the
+            // marketplace (extensionquery) is a POST with a request body that cannot
+            // be forwarded here, so let the WebView handle it natively with the
+            // desktop user agent instead of breaking it.
+            String method = request.getMethod();
+            if (!"GET".equalsIgnoreCase(method) && !"HEAD".equalsIgnoreCase(method)) {
+                return super.shouldInterceptRequest(view, request);
+            }
+
             try {
                 java.net.HttpURLConnection connection = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
-                connection.setRequestMethod("GET");
+                connection.setRequestMethod(method);
 
                 // Set ALL headers that a real desktop Chrome would send
                 connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36");
                 connection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
                 connection.setRequestProperty("Accept-Language", "en-US,en;q=0.9");
-                connection.setRequestProperty("Accept-Encoding", "gzip, deflate, br");
+                // Do NOT set Accept-Encoding manually: HttpURLConnection then sends
+                // "gzip" itself and transparently decompresses the stream. Setting it
+                // here returns raw compressed bytes that the WebView renders as
+                // garbage, which is what breaks CDN-served content such as extension
+                // descriptions and README files.
                 connection.setRequestProperty("Sec-Fetch-Site", "none");
                 connection.setRequestProperty("Sec-Fetch-Mode", "navigate");
                 connection.setRequestProperty("Sec-Fetch-User", "?1");
@@ -271,10 +284,25 @@ public class MainActivity extends AppCompatActivity implements Observer,
                 connection.setReadTimeout(15000);
 
                 int responseCode = connection.getResponseCode();
-                if (responseCode == 200) {
+                if (responseCode >= 200 && responseCode < 300) {
                     String contentType = connection.getContentType();
+                    String mimeType = contentType;
+                    String charset = null;
+                    if (contentType != null) {
+                        String[] parts = contentType.split(";");
+                        mimeType = parts[0].trim();
+                        for (int i = 1; i < parts.length; i++) {
+                            String part = parts[i].trim();
+                            if (part.startsWith("charset=")) {
+                                charset = part.substring("charset=".length()).trim();
+                            }
+                        }
+                    }
+                    if (mimeType == null) {
+                        mimeType = "application/octet-stream";
+                    }
                     java.io.InputStream inputStream = connection.getInputStream();
-                    return new WebResourceResponse(contentType, "utf-8", inputStream);
+                    return new WebResourceResponse(mimeType, charset, inputStream);
                 } else {
                     return super.shouldInterceptRequest(view, request);
                 }

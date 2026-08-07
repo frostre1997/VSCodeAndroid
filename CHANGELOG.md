@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-07 (CDN description fix)
+
+- **Fix broken marketplace descriptions in the WebView** — the CDN-bypass interceptor in `CustomWebViewClient` was re-fetching every request as a `GET` with a manual `Accept-Encoding: gzip, deflate, br` header:
+  - Open VSX's gallery API (`extensionquery`) uses **POST**, so the extension list and descriptions failed to load — non-GET requests are now left to the WebView's native stack (with the desktop user agent).
+  - The manual `Accept-Encoding` header disabled transparent decompression, so CDN responses (READMEs, extension descriptions, images) arrived as raw gzip bytes — it is now removed so `HttpURLConnection` handles gzip transparently.
+  - Response mime type and charset are now parsed from the `Content-Type` header instead of forcing `utf-8` on every response.
+
 ## 2026-08-07 (marketplace)
 
 - **Open VSX marketplace in WebView** — the actual marketplace used by `vscode.dev` (`open-vsx.org` and its extension-file CDN `*.blob.core.windows.net`) is now whitelisted as an internal domain, so the extension gallery, extension details and installs load inside the WebView instead of being kicked out to a Custom Tab.
