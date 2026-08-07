@@ -391,7 +391,7 @@ public class GitService {
             }
             List<DiffEntry> entries = cmd.call();
             return formatDiffEntries(repo, entries);
-        } catch (GitAPIException e) {
+        } catch (GitAPIException | IOException e) {
             throw GitServiceException.wrap("Failed to diff", e);
         }
     }
@@ -522,7 +522,7 @@ public class GitService {
             for (RevCommit c : Git.wrap(repo).log().addRange(head, up).call()) behind++;
             for (RevCommit c : Git.wrap(repo).log().addRange(up, head).call()) ahead++;
             return new int[]{(int) ahead, (int) behind};
-        } catch (IOException e) {
+        } catch (IOException | GitAPIException e) {
             throw GitServiceException.wrap("Failed to compute ahead/behind", e);
         }
     }
@@ -535,7 +535,7 @@ public class GitService {
         try (Repository repo = open(dir)) {
             StoredConfig config = repo.getConfig();
             return config.getString(null, null, key);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw GitServiceException.wrap("Failed to get config", e);
         }
     }
