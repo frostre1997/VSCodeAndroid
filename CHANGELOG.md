@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-07 (MainScreen focus + marketplace fix)
+
+- **Back to the MainScreen WebView** — the app no longer opens `vscode.dev` in a Chrome Custom Tab; it loads directly inside `MainActivity`'s WebView.
+- **Removed the request proxy/interceptor** — `CustomWebViewClient.shouldInterceptRequest` (the CDN-bypass re-fetching hack) is gone. All traffic now goes through the WebView's native network stack.
+- **Fixed `net::ERR_BLOCKED_BY_RESPONSE` on marketplace descriptions** — `vscode.dev` runs cross-origin isolation (COEP/COOP), so CDN-served content (extension descriptions/READMEs from open-vsx.org / blob CDN) that lacks a `Cross-Origin-Resource-Policy` header was being discarded by the browser. The initial URL now carries `?vscode-coi=off`, which disables cross-origin isolation and lets the marketplace load normally.
+- **Desktop user-agent moved to the real setup point** — the UA override now runs right after the WebView is created (the old block referenced the WebView before it existed and never executed).
+
 ## 2026-08-07 (CDN description fix)
 
 - **Fix broken marketplace descriptions in the WebView** — the CDN-bypass interceptor in `CustomWebViewClient` was re-fetching every request as a `GET` with a manual `Accept-Encoding: gzip, deflate, br` header:

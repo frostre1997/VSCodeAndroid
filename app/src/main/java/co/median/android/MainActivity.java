@@ -18,7 +18,6 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
-import android.graphics.Bitmap;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -44,15 +43,11 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
-import android.webkit.WebSettings;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebViewClient;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -69,7 +64,6 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
-import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -129,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements Observer,
     public static final String BROADCAST_RECEIVER_ACTION_WEBVIEW_LIMIT_REACHED = "io.gonative.android.MainActivity.Extra.BROADCAST_RECEIVER_ACTION_WEBVIEW_LIMIT_REACHED";
     private static final String webviewDatabaseSubdir = "webviewDatabase"; 
     private static final String TAG = MainActivity.class.getName();
+    private static final String DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
     public static final String INTENT_TARGET_URL = "targetUrl";
     public static final String EXTRA_WEBVIEW_WINDOW_OPEN = "io.gonative.android.MainActivity.Extra.WEBVIEW_WINDOW_OPEN";
     public static final String EXTRA_NEW_ROOT_URL = "newRootUrl";
@@ -234,102 +229,9 @@ public class MainActivity extends AppCompatActivity implements Observer,
     private UrlLoader urlLoader;
     private boolean shouldRemoveSplash = false;
 
-    private class CustomWebViewClient extends WebViewClient {
-        @Override
-        public void onPageStarted(WebView view, String url, Bitmap favicon) {
-            String desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
-            view.getSettings().setUserAgentString(desktopUA);
-            super.onPageStarted(view, url, favicon);
-        }
-
-        @Override
-        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-            String url = request.getUrl().toString();
-
-            // Only intercept http/https requests
-            if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                return super.shouldInterceptRequest(view, request);
-            }
-
-            // Never re-fetch non-GET requests. The Open VSX gallery API used by the
-            // marketplace (extensionquery) is a POST with a request body that cannot
-            // be forwarded here, so let the WebView handle it natively with the
-            // desktop user agent instead of breaking it.
-            String method = request.getMethod();
-            if (!"GET".equalsIgnoreCase(method) && !"HEAD".equalsIgnoreCase(method)) {
-                return super.shouldInterceptRequest(view, request);
-            }
-
-            try {
-                java.net.HttpURLConnection connection = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
-                connection.setRequestMethod(method);
-
-                // Set ALL headers that a real desktop Chrome would send
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36");
-                connection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
-                connection.setRequestProperty("Accept-Language", "en-US,en;q=0.9");
-                // Do NOT set Accept-Encoding manually: HttpURLConnection then sends
-                // "gzip" itself and transparently decompresses the stream. Setting it
-                // here returns raw compressed bytes that the WebView renders as
-                // garbage, which is what breaks CDN-served content such as extension
-                // descriptions and README files.
-                connection.setRequestProperty("Sec-Fetch-Site", "none");
-                connection.setRequestProperty("Sec-Fetch-Mode", "navigate");
-                connection.setRequestProperty("Sec-Fetch-User", "?1");
-                connection.setRequestProperty("Sec-Fetch-Dest", "document");
-                connection.setRequestProperty("Upgrade-Insecure-Requests", "1");
-                connection.setRequestProperty("Cache-Control", "max-age=0");
-                connection.setRequestProperty("Connection", "keep-alive");
-                connection.setConnectTimeout(15000);
-                connection.setReadTimeout(15000);
-
-                int responseCode = connection.getResponseCode();
-                if (responseCode >= 200 && responseCode < 300) {
-                    String contentType = connection.getContentType();
-                    String mimeType = contentType;
-                    String charset = null;
-                    if (contentType != null) {
-                        String[] parts = contentType.split(";");
-                        mimeType = parts[0].trim();
-                        for (int i = 1; i < parts.length; i++) {
-                            String part = parts[i].trim();
-                            if (part.startsWith("charset=")) {
-                                charset = part.substring("charset=".length()).trim();
-                            }
-                        }
-                    }
-                    if (mimeType == null) {
-                        mimeType = "application/octet-stream";
-                    }
-                    java.io.InputStream inputStream = connection.getInputStream();
-                    return new WebResourceResponse(mimeType, charset, inputStream);
-                } else {
-                    return super.shouldInterceptRequest(view, request);
-                }
-            } catch (Exception e) {
-                return super.shouldInterceptRequest(view, request);
-            }
-        }
-    }
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        // ----- FORCE DESKTOP USER-AGENT TO UNBLOCK CDN -----
-        if (mWebview != null) {
-            android.webkit.WebSettings settings = mWebview.getSettings();
-            settings.setDomStorageEnabled(true);
-            settings.setJavaScriptEnabled(true);
-            settings.setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-    
-            String desktopUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
-            settings.setUserAgentString(desktopUA);
 
-            if (mWebview instanceof WebView) {
-                ((WebView) mWebview).setWebViewClient(new CustomWebViewClient());
-            }
-        }
-            
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
 
         getWindow().getDecorView().setSystemUiVisibility(
@@ -341,21 +243,6 @@ public class MainActivity extends AppCompatActivity implements Observer,
             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
        );
        getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
-
-       // ----- OPEN VS CODE IN CHROME CUSTOM TAB (RELIABLE, NO BLOCKING) -----
-       String vscodeUrl = "https://vscode.dev/?settings=workbench.startupEditor%3Dnone&workbench.welcomePage.enabled=false";
-
-       CustomTabsIntent.Builder customTabsBuilder = new CustomTabsIntent.Builder();
-       customTabsBuilder.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
-       customTabsBuilder.setShowTitle(true);
-       customTabsBuilder.setUrlBarHidingEnabled(true);
-       customTabsBuilder.addDefaultShareMenuItem();
-
-       CustomTabsIntent customTabsIntent = customTabsBuilder.build();
-       customTabsIntent.launchUrl(this, Uri.parse(vscodeUrl));
-       
-       // Optional: close the app after opening
-       // finish();
 
         final AppConfig appConfig = AppConfig.getInstance(this);
         GoNativeApplication application = (GoNativeApplication)getApplication();
@@ -617,6 +504,10 @@ public class MainActivity extends AppCompatActivity implements Observer,
 
         this.mWebviewContainer.setupWebview(this, isRoot);
         setupWebviewTheme(appTheme);
+
+        // Force the desktop Chrome user agent so vscode.dev serves the full
+        // desktop client instead of the mobile UI.
+        this.mWebview.getSettings().setUserAgentString(DESKTOP_USER_AGENT);
 
         boolean isWebViewStateRestored = false;
         if (savedInstanceState != null) {
