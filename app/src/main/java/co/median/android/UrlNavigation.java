@@ -71,6 +71,7 @@ public class UrlNavigation {
     private String gnProfilePickerExec;
     private String currentWebviewUrl;
     private String jsBridgeScript;
+    private String gitSyncScript;
     private HtmlIntercept htmlIntercept;
     private Handler startLoadTimeout = new Handler();
 
@@ -610,9 +611,27 @@ public class UrlNavigation {
             // call the user created function that needs library access on page finished.
             mainActivity.runJavascript(LeanUtils.createJsForCallback("median_library_ready", null));
             mainActivity.runJavascript(LeanUtils.createJsForCallback("gonative_library_ready", null));
+            injectGitSyncScript(currentWebviewUrl);
             Log.d(TAG, "GoNative JSBridgeLibrary Injection Success");
         } catch (Exception e) {
             Log.d(TAG, "GoNative JSBridgeLibrary Injection Error:- " + e.getMessage());
+        }
+    }
+
+    private void injectGitSyncScript(String currentWebviewUrl) {
+        // Sync the Source Control badge on the vscode.dev editor page.
+        if (currentWebviewUrl == null || !currentWebviewUrl.startsWith("https://vscode.dev/")) return;
+        try {
+            if (gitSyncScript == null) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                InputStream is = new BufferedInputStream(mainActivity.getAssets().open("vscode-git-sync.js"));
+                IOUtils.copy(is, baos);
+                gitSyncScript = baos.toString();
+                IOUtils.close(is);
+            }
+            mainActivity.runJavascript(gitSyncScript);
+        } catch (Exception e) {
+            Log.d(TAG, "Git sync script injection Error:- " + e.getMessage());
         }
     }
 

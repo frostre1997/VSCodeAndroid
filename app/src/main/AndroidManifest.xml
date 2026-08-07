@@ -124,6 +124,12 @@
             <!--</intent-filter>-->
         </activity>
 
+        <!-- Git directory picker -->
+        <activity
+            android:name=".DirectoryPickerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+
         <!-- For file sharing without having to use external permissions. -->
         <provider
             android:name="androidx.core.content.FileProvider"

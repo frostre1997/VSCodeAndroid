@@ -2,6 +2,8 @@
 <resources>
 
 	<string name="app_name">Visual Code Studio</string>
+	<string name="git">Git</string>
+	<string name="git_select_this_dir">Select this directory</string>
 	<string name="action_search">Search</string>
 	<string name="action_refresh">Refresh</string>
     <string name="action_share">Share</string>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Source Control</title>
+    <link rel="stylesheet" href="git.css">
+</head>
+<body>
+
+    <div class="activitybar" id="activitybar"></div>
+
+    <div class="sidebar">
+        <div class="titlebar">
+            <span id="sidebar-title">Source Control</span>
+            <div class="actions" id="sidebar-actions"></div>
+        </div>
+        <div class="content active" id="view-sc"></div>
+        <div class="content" id="view-branches"></div>
+        <div class="content" id="view-history"></div>
+        <div class="content" id="view-repos"></div>
+        <div class="content" id="view-settings"></div>
+    </div>
+
+    <div class="editor">
+        <div class="editor-tab" id="editor-tab" style="display:none">
+            <span class="tab-name" id="editor-tab-name"></span>
+            <button class="close" id="editor-close" title="Close">&#x2715;</button>
+        </div>
+        <div class="editor-body" id="editor-body"></div>
+    </div>
+
+    <div class="progressbar" id="progress"><div class="bar" id="progress-bar"></div><div class="msg" id="progress-msg"></div></div>
+    <div class="toast" id="toast"></div>
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <div class="modal-title" id="modal-title"></div>
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-actions" id="modal-actions"></div>
+        </div>
+    </div>
+
+    <script src="git.js"></script>
+</body>
+</html>

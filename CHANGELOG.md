@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-08-07 (Source Control: native Git)
+
+- **Native Git engine (JGit 6.10)** — the app now has real Git support backed by `org.eclipse.jgit` + `org.eclipse.jgit.ssh.apache`: clone, init, status, stage/unstage, commit (incl. amend), push/pull/fetch (with credentials and SSH keys), branch create/checkout/delete, detached-HEAD checkout, history, per-file and per-commit unified diffs, and repo-local config.
+- **Source Control UI (VS Code style)** — a new `file:///android_asset/git/git.html` screen clones the vscode.dev Source Control panel look: activity bar, SOURCE CONTROL view with commit box + staged/changes lists, Branches, History, Repositories and Settings views, and an editor pane for diffs.
+- **FAB entry point** — a Git floating action button (bottom-right, git-branch icon) toggles between the editor and the Source Control UI.
+- **JavaScript bridge** — new `GitBridge` JS interface (`GitBridge.invoke(command, paramsJson, callbackId)`) with a `median.git` promise API added to `GoNativeJSBridgeLibrary.js`; native events (`status-changed`, `progress`, `credentials-required`, `ssh-passphrase-required`, `directory-picked`) flow to the page as `CustomEvent('median-git:<name>')`.
+- **Credentials & SSH** — HTTPS credentials and the SSH key passphrase are stored encrypted (AES-256-GCM + AndroidKeyStore); RSA-2048 key generation, OpenSSH-format public keys, SHA-256 fingerprints, and copy-to-clipboard are available in Settings.
+- **Directory picker** — a simple folder browser (`DirectoryPickerActivity`) for opening/cloning/initializing repositories.
+- **vscode.dev badge sync** — `vscode-git-sync.js` is injected on `vscode.dev` and keeps a change-count badge on the Source Control activity-bar icon in sync with the native repo.
+
 ## 2026-08-07 (title bar + VS Code logo)
 
 - **Brought back the VS Code logo (top left)** — the top title bar is visible again so the `window-appicon` logo icon renders at the top-left of the WebView (hidden while the whole title bar was `display:none`).

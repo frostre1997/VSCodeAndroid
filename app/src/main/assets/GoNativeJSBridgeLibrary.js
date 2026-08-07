@@ -384,3 +384,43 @@ median.android.swipeGestures = {
         addCommand("median://swipeGestures/disable");
     }
 }
+
+///////////////////////////////
+////    Source Control     ////
+///////////////////////////////
+
+// Single dispatcher used by the native GitBridge to deliver events to the
+// current page. Pages may also listen for CustomEvent 'median-git:<name>'.
+if (!window._medianGitEmit) {
+    window._medianGitEmit = function (name, data) {
+        var event;
+        if (typeof CustomEvent !== 'undefined' && data) {
+            event = new CustomEvent('median-git:' + name, { detail: data });
+        } else {
+            event = new CustomEvent('median-git:' + name);
+        }
+        document.dispatchEvent(event);
+    };
+}
+
+median.git = {
+    invoke: function (command, params) {
+        var callbackId = '_median_git_' + Math.random().toString(36).slice(2);
+        return new Promise(function (resolve, reject) {
+            window[callbackId] = function (result) {
+                delete window[callbackId];
+                if (result && result.success) {
+                    resolve(result.data);
+                } else {
+                    reject(new Error(result && result.error ? result.error : 'Git error'));
+                }
+            };
+            GitBridge.invoke(command, JSON.stringify(params || {}), callbackId);
+        });
+    },
+    on: function (name, handler) {
+        document.addEventListener('median-git:' + name, function (event) {
+            handler(event.detail);
+        });
+    }
+};

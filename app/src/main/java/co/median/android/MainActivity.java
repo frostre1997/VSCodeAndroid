@@ -101,6 +101,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import co.median.android.files.CapturedImageSaver;
+import co.median.android.git.GitBridge;
 import co.median.android.widget.GoNativeDrawerLayout;
 import co.median.android.widget.GoNativeSwipeRefreshLayout;
 import co.median.android.widget.MedianProgressView;
@@ -196,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements Observer,
     };
     private ShakeDetector shakeDetector = new ShakeDetector(this);
     private FileDownloader fileDownloader;
+    private GitBridge gitBridge;
     private FileWriterSharer fileWriterSharer;
     private LoginManager loginManager;
     private RegistrationManager registrationManager;
@@ -218,6 +220,7 @@ public class MainActivity extends AppCompatActivity implements Observer,
     private boolean restoreBrightnessOnNavigation = false;
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private ActivityResultLauncher<Intent> appBrowserActivityLauncher;
+    private ActivityResultLauncher<Intent> directoryPickerLauncher;
     private String deviceInfoCallback = "";
     private boolean flagThemeConfigurationChange = false;
     private boolean isContentReady;
@@ -333,6 +336,7 @@ public class MainActivity extends AppCompatActivity implements Observer,
         this.fileWriterSharer = new FileWriterSharer(this);
         this.fileDownloader = new FileDownloader(this);
         this.eventsManager = new MedianEventsManager(this);
+        this.gitBridge = new GitBridge(this);
 
         // register launchers
         this.requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -342,6 +346,15 @@ public class MainActivity extends AppCompatActivity implements Observer,
                 new ActivityResultContracts.StartActivityForResult(), result -> {
                     String callback = LeanUtils.createJsForCallback(CALLBACK_APP_BROWSER_CLOSED, null);
                     runJavascript(callback);
+                });
+        this.directoryPickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(), result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        String dir = result.getData().getStringExtra(DirectoryPickerActivity.EXTRA_PATH);
+                        if (dir != null && gitBridge != null) {
+                            gitBridge.onDirectoryPicked(dir);
+                        }
+                    }
                 });
 
         this.locationServiceHelper = new LocationServiceHelper(this);
@@ -357,6 +370,12 @@ public class MainActivity extends AppCompatActivity implements Observer,
         final ViewGroup content = findViewById(android.R.id.content);
 
         this.fullScreenLayout = findViewById(R.id.fullscreen);
+
+        com.google.android.material.floatingactionbutton.FloatingActionButton gitFab =
+                findViewById(R.id.git_fab);
+        if (gitFab != null) {
+            gitFab.setOnClickListener(v -> toggleGitUi());
+        }
         swipeRefreshLayout = findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setEnabled(appConfig.pullToRefresh);
         swipeRefreshLayout.setOnRefreshListener(this);
@@ -1763,6 +1782,32 @@ public class MainActivity extends AppCompatActivity implements Observer,
 
     public StatusCheckerBridge getStatusCheckerBridge() {
         return new StatusCheckerBridge();
+    }
+
+    public GitBridge getGitBridge() {
+        return gitBridge;
+    }
+
+    public void toggleGitUi() {
+        if (gitBridge == null || mWebview == null) return;
+        String current = mWebview.getUrl();
+        if (current != null && current.startsWith("file:///android_asset/git/")) {
+            if (mWebview.canGoBack()) {
+                mWebview.goBack();
+            } else {
+                loadUrl("https://vscode.dev/");
+            }
+        } else {
+            loadUrl(gitBridge.getGitUiUrl());
+        }
+    }
+
+    public void openGitDirectoryPicker() {
+        if (directoryPickerLauncher == null) return;
+        Intent intent = new Intent(this, DirectoryPickerActivity.class);
+        File startDir = gitBridge != null ? gitBridge.getReposDir() : getFilesDir();
+        intent.putExtra(DirectoryPickerActivity.EXTRA_START_DIR, startDir.getAbsolutePath());
+        directoryPickerLauncher.launch(intent);
     }
 
     @Override

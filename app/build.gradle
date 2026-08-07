@@ -199,6 +199,11 @@ dependencies {
     implementation fileTree(dir: 'libs', include: '*.jar')
     implementation fileTree(dir: 'libs', include: '*.aar')
     /**** end local ****/
+
+    /**** Source Control (Git) – JGit ****/
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:6.10.0.202406032230-r'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit.ssh.apache:6.10.0.202406032230-r'
+    /**** end Source Control ****/
 }
 
 apply from: file("../plugins.gradle"); applyNativeModulesAppBuildGradle(project)

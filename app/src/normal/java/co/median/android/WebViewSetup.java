@@ -17,6 +17,7 @@ import androidx.webkit.ServiceWorkerClientCompat;
 import androidx.webkit.ServiceWorkerControllerCompat;
 import androidx.webkit.WebViewFeature;
 
+import co.median.android.git.GitBridge;
 import co.median.median_core.AppConfig;
 import co.median.median_core.GNLog;
 import co.median.median_core.GoNativeWebviewInterface;
@@ -55,6 +56,12 @@ public class WebViewSetup {
 
         wv.removeJavascriptInterface("gonative_file_writer_sharer");
         wv.addJavascriptInterface(activity.getFileWriterSharer().getJavascriptBridge(), "gonative_file_writer_sharer");
+
+        GitBridge gitBridge = activity.getGitBridge();
+        if (gitBridge != null) {
+            wv.removeJavascriptInterface(GitBridge.NAME);
+            wv.addJavascriptInterface(gitBridge, GitBridge.NAME);
+        }
 
         wv.removeJavascriptInterface("JSBridge");
         wv.addJavascriptInterface(new WebViewInterface(activity::handleMessage), "JSBridge");
